@@ -51,8 +51,10 @@ public class Calculator {
 		list.add(newValue);
 		timeList.add(timeStamp);
 		if (list.size() >= length) {
-			if (list.size() > length)
+			if (list.size() > length) {
 				list.remove(0);
+				timeList.remove(0);
+			}
 			Double avg = this.average();
 			avgList.add(avg);
 			if (avgList.size() > length)
