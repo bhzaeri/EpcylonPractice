@@ -7,14 +7,17 @@ public class Calculator {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Calculator c = new Calculator(5);
-		Double[] list = new Double[] { 1.0, 4.0, 8.0, 9.0, 10.0, 12.0, 14.0, 17.0, 18.0, 19.0, 21.0, 36.0 };
+		Calculator c = new Calculator(10);
+		Double[] list = new Double[] { 22.27, 22.19, 22.08, 22.17, 22.18, 22.13, 22.23, 22.43, 22.24, 22.29, 22.15,
+				22.39, 22.38, 22.61, 23.36, 24.05, 23.75, 23.83, 23.95, 23.63, 23.82, 23.87, 23.65, 23.19, 23.10, 23.33,
+				22.68, 23.10, 22.40, 22.17 };
 		for (Double i : list) {
-			Double sma = c.sma(i);
+			Double sma = c.sma(i, "");
 			Double ema = c.ema(i);
-			System.out.println(i + " -- " + c.avgList.size() + " -- " + c.emaList.size());
+			// System.out.println(i + " -- " + c.avgList.size() + " -- " +
+			// c.emaList.size());
 			System.out.println(i + " -- " + sma + " -- " + ema);
-			System.out.println();
+			// System.out.println();
 		}
 	}
 
@@ -24,12 +27,14 @@ public class Calculator {
 		list = new Vector<Double>();
 		avgList = new Vector<Double>();
 		emaList = new Vector<Double>();
+		timeList = new Vector<String>();
 	}
 
 	final private int length;
 	final private List<Double> list;
 	final private List<Double> avgList;
 	final private List<Double> emaList;
+	final private List<String> timeList;
 
 	final private double smoothingConst;
 
@@ -42,8 +47,9 @@ public class Calculator {
 		return avg;
 	}
 
-	private Double sma(Double newValue) {
+	private Double sma(Double newValue, String timeStamp) {
 		list.add(newValue);
+		timeList.add(timeStamp);
 		if (list.size() >= length) {
 			if (list.size() > length)
 				list.remove(0);
@@ -75,13 +81,13 @@ public class Calculator {
 		return ema;
 	}
 
-	public Double add(Double newValue) {
-		sma(newValue);
+	public synchronized Double add(Double newValue, String timeStamp) {
+		sma(newValue, timeStamp);
 		ema(newValue);
 		return getEma();
 	}
 
-	public Double getEma() {
+	public synchronized Double getEma() {
 		return emaList.size() > 0 ? emaList.get(emaList.size() - 1) : null;
 	}
 }

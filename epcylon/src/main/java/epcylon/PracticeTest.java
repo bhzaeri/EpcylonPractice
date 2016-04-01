@@ -31,7 +31,7 @@ public class PracticeTest {
 				StockData data = mapper.readValue(response, StockData.class);
 				System.out.println("FROM SERVER: " + response);
 				
-				Thread.sleep(1000);
+				Thread.sleep(30000);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();

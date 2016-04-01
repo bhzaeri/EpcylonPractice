@@ -17,10 +17,10 @@ public class MACDCalculator {
 	final private Calculator _26;
 	final private Calculator _9;
 
-	public void add(Double newValue) {
-		Double a1 = _12.add(newValue);
-		Double a2 = _26.add(newValue);
+	public synchronized void add(Double newValue, String timeStamp) {
+		Double a1 = _12.add(newValue, timeStamp);
+		Double a2 = _26.add(newValue, timeStamp);
 		if (a1 != null && a2 != null)
-			_9.add(a1 - a2);
+			_9.add(a1 - a2, timeStamp);
 	}
 }
