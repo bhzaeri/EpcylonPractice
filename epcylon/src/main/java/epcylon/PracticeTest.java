@@ -25,13 +25,13 @@ public class PracticeTest {
 			System.out.println("FROM SERVER: " + response);
 
 			for (int i = 0; i < 10; i++) {
-				sentence = "subscribe USD-CAD";
+				sentence = "subscribe AUD-USD";
 				outToServer.writeBytes(sentence + '\n');
 				response = inFromServer.readLine();
-				StockData data = mapper.readValue(response, StockData.class);
+				mapper.readValue(response, StockData.class);
 				System.out.println("FROM SERVER: " + response);
 				
-				Thread.sleep(30000);
+//				Thread.sleep(30000);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();

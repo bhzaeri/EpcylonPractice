@@ -13,7 +13,7 @@ public class MinuteBar {
 				"2016-04-01T01:31:57.020Z", "2016-04-01T01:33:21.403Z" };
 		MinuteBar minuteBar = new MinuteBar(5, new MACDCalculator());
 		for (String line : lines) {
-			minuteBar.getTickData("1", line);
+			minuteBar.getTickData(1.0, line);
 		}
 	}
 
@@ -24,11 +24,11 @@ public class MinuteBar {
 
 	private MACDCalculator macdCalculator;
 	private int minutes;
-	private String lastTickData = null;
+	private Double lastTickData = null;
 	private int lastTickMin = 0;
 	private int lastTickSec = 0;
 
-	public void getTickData(String tickData, String tickTime) {
+	public void getTickData(Double tickData, String tickTime) {
 		String pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:([0-9]{2}):([0-9]{2}).[0-9]{3}Z";
 		Pattern r = Pattern.compile(pattern);
 		Matcher m = r.matcher(tickTime);
@@ -44,7 +44,7 @@ public class MinuteBar {
 			if (sec % 60 < lastTickSec) {
 				if (lastTickData != null) {
 					String temp = new StringBuilder(tickTime).replace(17, 23, "00.000").toString();
-					macdCalculator.add(Double.parseDouble(lastTickData), temp);
+					macdCalculator.add(lastTickData, temp);
 				}
 			}
 			lastTickSec = sec;
@@ -58,7 +58,7 @@ public class MinuteBar {
 					if (t.length() == 1)
 						t = "0" + t;
 					String temp = new StringBuilder(tickTime).replace(17, 23, "00.000").replace(14, 16, t).toString();
-					macdCalculator.add(Double.parseDouble(lastTickData), temp);
+					macdCalculator.add(lastTickData, temp);
 				}
 			}
 			lastTickSec = sec;
