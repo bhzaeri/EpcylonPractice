@@ -7,14 +7,24 @@ public class MinuteBarBase {
 
 	}
 
-	public MinuteBarBase(int minuteBase, int secondBase) {
+	public MinuteBarBase(String currency, int minuteBase, int secondBase) {
 		super();
+		this.currency = currency;
 		this.minuteBase = minuteBase;
 		this.secondBase = secondBase;
 	}
 
+	private String currency;
 	private int minuteBase;
 	private int secondBase;
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
 
 	public int getMinuteBase() {
 		return minuteBase;
@@ -37,7 +47,7 @@ public class MinuteBarBase {
 		// TODO Auto-generated method stub
 		if (obj != null && obj instanceof MinuteBarBase) {
 			MinuteBarBase t = (MinuteBarBase) obj;
-			if (this.minuteBase == t.minuteBase && this.secondBase == t.secondBase)
+			if (this.minuteBase == t.minuteBase && this.secondBase == t.secondBase && this.currency.equals(t.currency))
 				return true;
 		}
 		return false;

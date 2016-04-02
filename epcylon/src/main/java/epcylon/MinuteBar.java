@@ -7,11 +7,13 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import epcylon.server.ClientHandler;
+
 public class MinuteBar {
 
 	private static Map<MinuteBarBase, MinuteBar> instances;
 
-	public synchronized static MinuteBar getInstance(MinuteBarBase minuteBase) {
+	public synchronized static MinuteBar getInstance(MinuteBarBase minuteBase, ClientHandler clientHandler) {
 		if (instances == null) {
 			instances = new HashMap<MinuteBarBase, MinuteBar>();
 		}
@@ -20,6 +22,7 @@ public class MinuteBar {
 			instance = new MinuteBar(minuteBase.getMinuteBase(), minuteBase.getSecondBase(), new MACDCalculator());
 			instances.put(minuteBase, instance);
 		}
+		instance.macdCalculator.addClientHandler(clientHandler);
 		return instance;
 	}
 
@@ -39,7 +42,7 @@ public class MinuteBar {
 		}
 	}
 
-	private MinuteBar(int minutes, int seconds, MACDCalculator macdCalculator) {
+	public MinuteBar(int minutes, int seconds, MACDCalculator macdCalculator) {
 		this.minutes = minutes;
 		this.macdCalculator = macdCalculator;
 		this.seconds = seconds;
@@ -142,5 +145,13 @@ public class MinuteBar {
 		}
 
 		logger.info(min + " -- " + sec);
+	}
+
+	public void addClientHandler(ClientHandler clientHandler) {
+		this.macdCalculator.addClientHandler(clientHandler);
+	}
+
+	public void removeClientHandler(ClientHandler clientHandler) {
+		this.macdCalculator.removeClientHandler(clientHandler);
 	}
 }

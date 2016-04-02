@@ -12,6 +12,7 @@ import java.util.Vector;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import epcylon.PracticeTest.StockData;
+import epcylon.server.ClientHandler;
 
 public class StockClient {
 
@@ -35,6 +36,24 @@ public class StockClient {
 		return instance;
 	}
 
+	public static void start(String currency, MinuteBarBase barBase, ClientHandler clientHandler) {
+		final StockClient stockClient = StockClient.getInstance(currency);
+		MinuteBar minuteBar = MinuteBar.getInstance(barBase, clientHandler);
+		stockClient.add(minuteBar);
+		new Thread(new Runnable() {
+
+			public void run() {
+				// TODO Auto-generated method stub
+				stockClient.startReceiveTickData();
+			}
+		}).start();
+	}
+
+	public static void stopClientHandler(MinuteBarBase minuteBase, ClientHandler clientHandler) {
+		MinuteBar minuteBar = MinuteBar.getInstance(minuteBase, clientHandler);
+		minuteBar.removeClientHandler(clientHandler);
+	}
+
 	private StockClient(String currency) {
 		minuteBars = new Vector<MinuteBar>();
 		this.currency = currency;
@@ -44,18 +63,18 @@ public class StockClient {
 	private Vector<MinuteBar> minuteBars;
 	private String currency;
 	private Object lock1;
-	private volatile Boolean repeat = false;
+	private volatile Boolean receiving = false;
 
 	public String getCurrency() {
 		return currency;
 	}
 
 	public Boolean isStopped() {
-		return !repeat;
+		return !receiving;
 	}
 
 	public void stop() {
-		this.repeat = false;
+		this.receiving = false;
 	}
 
 	public void add(MinuteBar bar) {
@@ -66,7 +85,7 @@ public class StockClient {
 	}
 
 	public void startReceiveTickData() {
-		if (repeat) {
+		if (receiving) {
 			return;
 		}
 		String sentence;
@@ -83,7 +102,7 @@ public class StockClient {
 			System.out.println("FROM SERVER: " + response);
 			sentence = "subscribe " + currency;
 			outToServer.writeBytes(sentence + '\n');
-			while (repeat) {
+			while (receiving) {
 				response = inFromServer.readLine();
 				if (response.contains("error"))
 					break;
