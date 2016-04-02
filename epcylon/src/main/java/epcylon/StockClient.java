@@ -43,7 +43,7 @@ public class StockClient {
 	private Vector<MinuteBar> minuteBars;
 	private String currency;
 	private Object lock1;
-	private Boolean repeat = true;
+	private volatile Boolean repeat = true;
 
 	public String getCurrency() {
 		return currency;
@@ -99,6 +99,7 @@ public class StockClient {
 				if (clientSocket != null) {
 					clientSocket.close();
 					System.out.println("Connection closed!");
+					this.startReceiveTickData();
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -107,5 +108,4 @@ public class StockClient {
 		}
 
 	}
-
 }

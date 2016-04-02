@@ -11,19 +11,21 @@ public class MinuteBar {
 				"2016-04-01T01:24:49.520Z", "2016-04-01T01:26:01.020Z", "2016-04-01T01:26:51.400Z",
 				"2016-04-01T01:27:51.770Z", "2016-04-01T01:28:52.150Z", "2016-04-01T01:29:52.520Z",
 				"2016-04-01T01:31:57.020Z", "2016-04-01T01:33:21.403Z" };
-		MinuteBar minuteBar = new MinuteBar(5, new MACDCalculator());
+		MinuteBar minuteBar = new MinuteBar(0, 10, new MACDCalculator());
 		for (String line : lines) {
 			minuteBar.getTickData(1.0, line);
 		}
 	}
 
-	public MinuteBar(int minutes, MACDCalculator macdCalculator) {
+	public MinuteBar(int minutes, int seconds, MACDCalculator macdCalculator) {
 		this.minutes = minutes;
 		this.macdCalculator = macdCalculator;
+		this.seconds = seconds;
 	}
 
 	private MACDCalculator macdCalculator;
 	private int minutes;
+	private int seconds;
 	private Double lastTickData = null;
 	private int lastTickMin = 0;
 	private int lastTickSec = 0;
@@ -40,7 +42,21 @@ public class MinuteBar {
 		int min = Integer.parseInt(minSt);
 		int sec = Integer.parseInt(secSt);
 
-		if (this.minutes == 1) {
+		if (this.seconds > 0) {
+			if ((sec % seconds) < (lastTickSec % seconds)) {
+				if (lastTickData != null) {
+					int roundedSec = lastTickSec - lastTickSec % seconds;
+					String t = Integer.toString(roundedSec);
+					if (t.length() == 1)
+						t = "0" + t;
+					String temp = new StringBuilder(tickTime).replace(17, 23, t + ".000").toString();
+					macdCalculator.add(lastTickData, temp);
+				}
+			}
+			lastTickSec = sec;
+			lastTickMin = min;
+			lastTickData = tickData;
+		} else if (this.minutes == 1) {
 			if (sec % 60 < lastTickSec) {
 				if (lastTickData != null) {
 					String temp = new StringBuilder(tickTime).replace(17, 23, "00.000").toString();
