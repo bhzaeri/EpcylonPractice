@@ -1,13 +1,27 @@
 package epcylon;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
-import org.apache.log4j.spi.LoggerFactory;
 
 public class MinuteBar {
+
+	private static Map<MinuteBarBase, MinuteBar> instances;
+
+	public synchronized static MinuteBar getInstance(MinuteBarBase minuteBase) {
+		if (instances == null) {
+			instances = new HashMap<MinuteBarBase, MinuteBar>();
+		}
+		MinuteBar instance = instances.get(minuteBase);
+		if (instance == null) {
+			instance = new MinuteBar(minuteBase.getMinuteBase(), minuteBase.getSecondBase(), new MACDCalculator());
+			instances.put(minuteBase, instance);
+		}
+		return instance;
+	}
 
 	private static Logger logger = Logger.getLogger(MinuteBar.class);
 
@@ -25,7 +39,7 @@ public class MinuteBar {
 		}
 	}
 
-	public MinuteBar(int minutes, int seconds, MACDCalculator macdCalculator) {
+	private MinuteBar(int minutes, int seconds, MACDCalculator macdCalculator) {
 		this.minutes = minutes;
 		this.macdCalculator = macdCalculator;
 		this.seconds = seconds;

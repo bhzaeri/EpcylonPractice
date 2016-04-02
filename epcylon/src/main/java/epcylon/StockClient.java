@@ -30,6 +30,7 @@ public class StockClient {
 		StockClient instance = stockClients.get(currency);
 		if (instance == null) {
 			instance = new StockClient(currency);
+			stockClients.put(currency, instance);
 		}
 		return instance;
 	}
@@ -43,27 +44,31 @@ public class StockClient {
 	private Vector<MinuteBar> minuteBars;
 	private String currency;
 	private Object lock1;
-	private volatile Boolean repeat = true;
+	private volatile Boolean repeat = false;
 
 	public String getCurrency() {
 		return currency;
 	}
 
-	public Boolean getRepeat() {
-		return repeat;
+	public Boolean isStopped() {
+		return !repeat;
 	}
 
-	public void setRepeat(Boolean repeat) {
-		this.repeat = repeat;
+	public void stop() {
+		this.repeat = false;
 	}
 
 	public void add(MinuteBar bar) {
 		synchronized (lock1) {
-			minuteBars.add(bar);
+			if (!minuteBars.contains(bar))
+				minuteBars.add(bar);
 		}
 	}
 
 	public void startReceiveTickData() {
+		if (repeat) {
+			return;
+		}
 		String sentence;
 		String response;
 		Socket clientSocket = null;
