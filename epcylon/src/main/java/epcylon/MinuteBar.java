@@ -93,7 +93,7 @@ public class MinuteBar {
 						t = "0" + t;
 					String temp = new StringBuilder(lastTickTime).replace(17, 23, t + ".000").toString();
 					macdCalculator.add(lastTickData, temp);
-					logger.info(temp);
+					// logger.info(temp);
 				}
 			}
 			lastTickSec = sec;
@@ -110,7 +110,7 @@ public class MinuteBar {
 				if (lastTickData != null) {
 					String temp = new StringBuilder(lastTickTime).replace(17, 23, "00.000").toString();
 					macdCalculator.add(lastTickData, temp);
-					logger.info(temp);
+					// logger.info(temp);
 				}
 			}
 			lastTickSec = sec;
@@ -133,7 +133,7 @@ public class MinuteBar {
 					String temp = new StringBuilder(lastTickTime).replace(17, 23, "00.000").replace(14, 16, t)
 							.toString();
 					macdCalculator.add(lastTickData, temp);
-					logger.info(temp);
+					// logger.info(temp);
 				}
 			}
 			lastTickSec = sec;
@@ -146,7 +146,7 @@ public class MinuteBar {
 			lastTickData = tickData;
 		}
 
-		logger.info(min + " -- " + sec);
+//		logger.info(min + " -- " + sec);
 	}
 
 	public void addClientHandler(ClientHandler clientHandler) {

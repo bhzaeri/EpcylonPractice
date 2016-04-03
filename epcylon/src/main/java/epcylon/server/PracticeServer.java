@@ -68,4 +68,16 @@ public class PracticeServer {
 		}
 	}
 
+	
+	@Override
+	protected void finalize() throws Throwable {
+		// TODO Auto-generated method stub
+		super.finalize();
+		if (serverSocket != null)
+		{
+			serverSocket.close();
+			logger.info("Server shut down.");
+		}
+	}
+
 }

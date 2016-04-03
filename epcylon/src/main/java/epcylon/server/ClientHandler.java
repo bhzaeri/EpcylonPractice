@@ -134,13 +134,13 @@ public class ClientHandler {
 	public void write(final String message) throws IOException {
 		if (output == null)
 			output = new PrintWriter(socket.getOutputStream(), true);
-		new Thread(new Runnable() {
-			public void run() {
-				// TODO Auto-generated method stub
-				// write the message on the client output
-				output.println(message);
-			}
-		}).start();
+		// new Thread(new Runnable() {
+		// public void run() {
+		// TODO Auto-generated method stub
+		// write the message on the client output
+		output.println(message);
+		// }
+		// }).start();
 	}
 
 	@Override

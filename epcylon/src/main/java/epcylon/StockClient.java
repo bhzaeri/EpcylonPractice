@@ -109,12 +109,12 @@ public class StockClient {
 			sentence = "login fiInKuFbMzUQtqiCXfJbuowMgFEzJcguLXMirmsfGjfsJMdF";
 			outToServer.writeBytes(sentence + '\n');
 			response = inFromServer.readLine();
-			System.out.println("FROM SERVER: " + response);
+			logger.info("FROM SERVER: " + response);
 			sentence = "subscribe " + currency;
 			outToServer.writeBytes(sentence + '\n');
 			int i = 0;
 			while (receiving) {
-				Thread.sleep(1000);
+				// Thread.sleep(1000);
 				if (i >= Util.lines.length)
 					break;
 				response = Util.lines[i++];
@@ -129,7 +129,7 @@ public class StockClient {
 					}
 				}
 
-				logger.info("FROM SERVER: " + response);
+				// logger.info("FROM SERVER: " + response);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
