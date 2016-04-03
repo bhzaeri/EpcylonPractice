@@ -9,13 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import epcylon.PracticeTest.StockData;
 import epcylon.server.ClientHandler;
 
 public class StockClient {
 
+	private static Logger logger = Logger.getLogger(StockClient.class);
 	public static String ERROR_RESPONSE = "{\"error\":\"invalid currency pair.\"}\n";
 
 	public static void main(String[] args) {
@@ -36,12 +37,12 @@ public class StockClient {
 		return instance;
 	}
 
-	public static void start(String currency, MinuteBarBase barBase, ClientHandler clientHandler) {
-		final StockClient stockClient = StockClient.getInstance(currency);
+	public static void start(MinuteBarBase barBase, ClientHandler clientHandler) {
+		final StockClient stockClient = StockClient.getInstance(barBase.getCurrency());
 		MinuteBar minuteBar = MinuteBar.getInstance(barBase, clientHandler);
 		stockClient.add(minuteBar);
+		logger.info(barBase.getCurrency() + " :: is running");
 		new Thread(new Runnable() {
-
 			public void run() {
 				// TODO Auto-generated method stub
 				stockClient.startReceiveTickData();
@@ -88,6 +89,7 @@ public class StockClient {
 		if (receiving) {
 			return;
 		}
+		receiving = true;
 		String sentence;
 		String response;
 		Socket clientSocket = null;
@@ -102,8 +104,12 @@ public class StockClient {
 			System.out.println("FROM SERVER: " + response);
 			sentence = "subscribe " + currency;
 			outToServer.writeBytes(sentence + '\n');
+			int i = 0;
 			while (receiving) {
-				response = inFromServer.readLine();
+				if (i >= Util.lines.length)
+					break;
+				response = Util.lines[i++];
+				// response = inFromServer.readLine();
 				if (response.contains("error"))
 					break;
 				StockData data = mapper.readValue(response, StockData.class);
@@ -120,10 +126,11 @@ public class StockClient {
 			ex.printStackTrace();
 		} finally {
 			try {
+				receiving = false;
 				if (clientSocket != null) {
 					clientSocket.close();
 					System.out.println("Connection closed!");
-					this.startReceiveTickData();
+					// this.startReceiveTickData();
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -132,4 +139,75 @@ public class StockClient {
 		}
 
 	}
+
+	public static class StockData {
+		StockData2 quote;
+
+		public StockData2 getQuote() {
+			return quote;
+		}
+
+		public void setQuote(StockData2 quote) {
+			this.quote = quote;
+		}
+	}
+
+	public static class StockData2 {
+		String pair;
+		String time;
+		StockData3 data;
+
+		public String getPair() {
+			return pair;
+		}
+
+		public void setPair(String pair) {
+			this.pair = pair;
+		}
+
+		public String getTime() {
+			return time;
+		}
+
+		public void setTime(String time) {
+			this.time = time;
+		}
+
+		public StockData3 getData() {
+			return data;
+		}
+
+		public void setData(StockData3 data) {
+			this.data = data;
+		}
+	}
+
+	public static class StockData3 {
+		double bid, ask, last;
+
+		public double getBid() {
+			return bid;
+		}
+
+		public void setBid(double bid) {
+			this.bid = bid;
+		}
+
+		public double getAsk() {
+			return ask;
+		}
+
+		public void setAsk(double ask) {
+			this.ask = ask;
+		}
+
+		public double getLast() {
+			return last;
+		}
+
+		public void setLast(double last) {
+			this.last = last;
+		}
+	}
+
 }

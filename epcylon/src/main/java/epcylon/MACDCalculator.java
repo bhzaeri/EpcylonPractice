@@ -13,13 +13,15 @@ public class MACDCalculator {
 
 	}
 
-	public MACDCalculator() {
+	public MACDCalculator(MinuteBarBase barBase) {
 		_12 = new Calculator(12);
 		_26 = new Calculator(26);
 		_9 = new Calculator(9);
 		this.clientHandlers = new Vector<ClientHandler>();
+		this.minuteBarBase = barBase;
 	}
 
+	final MinuteBarBase minuteBarBase;
 	final List<ClientHandler> clientHandlers;
 	final private Calculator _12;
 	final private Calculator _26;
@@ -42,7 +44,7 @@ public class MACDCalculator {
 		if (ema_9 != null)
 			try {
 				for (ClientHandler clientHandler : clientHandlers) {
-					clientHandler.write(ema_9.toString());
+					clientHandler.write(minuteBarBase.getCurrency() + "," + ema_9.toString());
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

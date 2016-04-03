@@ -19,7 +19,8 @@ public class MinuteBar {
 		}
 		MinuteBar instance = instances.get(minuteBase);
 		if (instance == null) {
-			instance = new MinuteBar(minuteBase.getMinuteBase(), minuteBase.getSecondBase(), new MACDCalculator());
+			instance = new MinuteBar(minuteBase.getMinuteBase(), minuteBase.getSecondBase(),
+					new MACDCalculator(minuteBase));
 			instances.put(minuteBase, instance);
 		}
 		instance.macdCalculator.addClientHandler(clientHandler);
@@ -36,7 +37,7 @@ public class MinuteBar {
 				// "2016-04-01T01:26:51.400Z",
 				"2016-04-01T01:27:51.770Z", "2016-04-01T01:28:52.150Z", "2016-04-01T01:41:52.520Z",
 				"2016-04-01T02:33:06.020Z", "2016-04-01T03:03:21.403Z" };
-		MinuteBar minuteBar = new MinuteBar(5, 0, new MACDCalculator());
+		MinuteBar minuteBar = new MinuteBar(5, 0, new MACDCalculator(null));
 		for (String line : lines) {
 			minuteBar.getTickData(1.0, line);
 		}
