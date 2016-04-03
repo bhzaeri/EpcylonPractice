@@ -131,11 +131,16 @@ public class ClientHandler {
 		}
 	}
 
-	public void write(String message) throws IOException {
+	public void write(final String message) throws IOException {
 		if (output == null)
 			output = new PrintWriter(socket.getOutputStream(), true);
-		// write the message on the client output
-		output.println(message);
+		new Thread(new Runnable() {
+			public void run() {
+				// TODO Auto-generated method stub
+				// write the message on the client output
+				output.println(message);
+			}
+		}).start();
 	}
 
 	@Override

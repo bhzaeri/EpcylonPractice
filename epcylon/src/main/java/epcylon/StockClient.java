@@ -114,6 +114,7 @@ public class StockClient {
 			outToServer.writeBytes(sentence + '\n');
 			int i = 0;
 			while (receiving) {
+				Thread.sleep(1000);
 				if (i >= Util.lines.length)
 					break;
 				response = Util.lines[i++];
