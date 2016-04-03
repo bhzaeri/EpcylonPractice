@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
+import epcylon.StockClient.StockData;
 import epcylon.server.ClientHandler;
 
 public class MACDCalculator {
@@ -44,11 +47,40 @@ public class MACDCalculator {
 		if (ema_9 != null)
 			try {
 				for (ClientHandler clientHandler : clientHandlers) {
-					clientHandler.write(timeStamp + "," + minuteBarBase.getCurrency() + "," + ema_9.toString());
+					String json = "{\"timeStamp\":\"" + timeStamp + "\",\"pair\":\"" + minuteBarBase.getCurrency()
+							+ "\",\"signal\":" + ema_9.toString() + "}";
+					clientHandler.write(json);
+					Class1 data = new ObjectMapper().readValue(json, Class1.class);
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+	}
+
+	public static class Class1 {
+		private String timeStamp;
+		private String pair;
+		private Double signal;
+		public String getTimeStamp() {
+			return timeStamp;
+		}
+		public void setTimeStamp(String timeStamp) {
+			this.timeStamp = timeStamp;
+		}
+		public String getPair() {
+			return pair;
+		}
+		public void setPair(String pair) {
+			this.pair = pair;
+		}
+		public Double getSignal() {
+			return signal;
+		}
+		public void setSignal(Double signal) {
+			this.signal = signal;
+		}
+		
+		
 	}
 }
