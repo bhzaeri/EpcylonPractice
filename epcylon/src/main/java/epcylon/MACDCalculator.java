@@ -44,7 +44,7 @@ public class MACDCalculator {
 		if (ema_9 != null)
 			try {
 				for (ClientHandler clientHandler : clientHandlers) {
-					clientHandler.write(minuteBarBase.getCurrency() + "," + ema_9.toString());
+					clientHandler.write(timeStamp + "," + minuteBarBase.getCurrency() + "," + ema_9.toString());
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

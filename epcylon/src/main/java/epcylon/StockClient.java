@@ -12,6 +12,7 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import epcylon.exceptions.CurrencyPairInvalidException;
 import epcylon.server.ClientHandler;
 
 public class StockClient {
@@ -27,18 +28,25 @@ public class StockClient {
 	private static Map<String, StockClient> stockClients = null;
 
 	public synchronized static StockClient getInstance(String currency) {
-		if (stockClients == null)
+		if (stockClients == null) {
 			stockClients = new HashMap<String, StockClient>();
-		StockClient instance = stockClients.get(currency);
-		if (instance == null) {
-			instance = new StockClient(currency);
-			stockClients.put(currency, instance);
+			stockClients.put("AUD-­USD", new StockClient("AUD-­USD"));
+			stockClients.put("EUR-­USD", new StockClient("EUR-­USD"));
+			stockClients.put("USD-JPY", new StockClient("­USD-JPY"));
+			stockClients.put("USD-CAD", new StockClient("USD-CAD"));
 		}
+		StockClient instance = stockClients.get(currency);
+		// if (instance == null) {
+		// instance = new StockClient(currency);
+		// stockClients.put(currency, instance);
+		// }
 		return instance;
 	}
 
-	public static void start(MinuteBarBase barBase, ClientHandler clientHandler) {
+	public static void start(MinuteBarBase barBase, ClientHandler clientHandler) throws CurrencyPairInvalidException {
 		final StockClient stockClient = StockClient.getInstance(barBase.getCurrency());
+		if (stockClient == null)
+			throw new CurrencyPairInvalidException(barBase.getCurrency());
 		MinuteBar minuteBar = MinuteBar.getInstance(barBase, clientHandler);
 		stockClient.add(minuteBar);
 		logger.info(barBase.getCurrency() + " :: is running");
@@ -120,7 +128,7 @@ public class StockClient {
 					}
 				}
 
-				System.out.println("FROM SERVER: " + response);
+				logger.info("FROM SERVER: " + response);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();

@@ -26,20 +26,21 @@ public class PracticeTest {
 			response = inFromServer.readLine();
 			System.out.println("FROM SERVER: " + response);
 
+			sentence = "subscribe ";
+			outToServer.writeBytes(sentence + '\n');
+
 			for (int i = 0; i < 10; i++) {
-				sentence = "subscribe USD-CAD";
-				outToServer.writeBytes(sentence + '\n');
 				response = inFromServer.readLine();
-//				mapper.readValue(response, StockData.class);
+				// mapper.readValue(response, StockData.class);
 				System.out.println("FROM SERVER: " + response);
-				
-//				Thread.sleep(30000);
+
+				// Thread.sleep(30000);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {
 			try {
-				if (clientSocket != null){
+				if (clientSocket != null) {
 					clientSocket.close();
 					System.out.println("Connection closed!");
 				}

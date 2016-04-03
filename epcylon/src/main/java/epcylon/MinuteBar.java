@@ -23,7 +23,8 @@ public class MinuteBar {
 					new MACDCalculator(minuteBase));
 			instances.put(minuteBase, instance);
 		}
-		instance.macdCalculator.addClientHandler(clientHandler);
+		if (clientHandler != null)
+			instance.macdCalculator.addClientHandler(clientHandler);
 		return instance;
 	}
 

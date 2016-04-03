@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import epcylon.MinuteBar;
 import epcylon.MinuteBarBase;
 import epcylon.StockClient;
+import epcylon.exceptions.CurrencyPairInvalidException;
 
 public class ClientHandler {
 
@@ -33,8 +34,8 @@ public class ClientHandler {
 	private Boolean isSubscribed = false;
 	private Boolean flag1 = true;
 	private Boolean flag2 = true;
-	BufferedReader input = null;
-	PrintWriter output = null;
+	private BufferedReader input = null;
+	private PrintWriter output = null;
 	private Map<String, MinuteBarBase> minuteBarBases = new HashMap<String, MinuteBarBase>();
 
 	public synchronized void addBarBase(MinuteBarBase barBase) {
@@ -60,41 +61,88 @@ public class ClientHandler {
 			String temp = clientSentence == null ? "" : clientSentence.trim();
 			if (temp.startsWith("login")) {
 				String[] ss = temp.split(" ");
-				String password = ss[1];
-				isLoggedIn = true;
-				logger.info(socket.getLocalSocketAddress() + " : logged in successfully");
+				String password = null;
+				if (ss.length > 1)
+					password = ss[1];
+				else {
+					this.write("{\"error\":\"no password.\"}");
+					continue;
+				}
+				if ("iamprogrammerihavenolife".equals(password)) {
+					isLoggedIn = true;
+					logger.info(socket.getLocalSocketAddress() + " : logged in successfully");
+					this.write("{\"connected\":true}");
+				} else {
+					this.write("{\"error\":\"invalid login key\"}\n<close connection>");
+					break;
+				}
+
 			} else if (temp.startsWith("subscribe")) {
 				if (this.isLoggedIn) {
 					String[] ss = temp.split(" ");
-					String currency = ss[1];
-					int minuteBase = Integer.parseInt(ss[2]);
-					MinuteBarBase barBase = new MinuteBarBase(currency, minuteBase, 0);
+					String currency = "";
+					if (ss.length > 1)
+						currency = ss[1];
+					else {
+						this.write("{\"error\":\"no currency pair\"}");
+						continue;
+					}
+					int minuteBase;
+					if (ss.length > 2)
+						minuteBase = Integer.parseInt(ss[2]);
+					else {
+						this.write("{\"error\":\"no minute bar\"}");
+						continue;
+					}
+					MinuteBarBase barBase = new MinuteBarBase(currency, 0, 15);
 					if (!minuteBarBases.containsKey(currency)) {
-						StockClient.start(barBase, this);
+						try {
+							StockClient.start(barBase, this);
+						} catch (CurrencyPairInvalidException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							this.write("{\"error\":\"" + e.getMessage() + "\"}");
+							continue;
+						}
 						this.minuteBarBases.put(barBase.getCurrency(), barBase);
 						logger.info("subscribed");
 					}
 				} else
-					this.write("not authorized");
+					this.write("{\"error\":\"not authorized\"}");
 			} else if (temp.startsWith("unsubscribe")) {
 				if (this.isLoggedIn) {
 					String[] ss = temp.split(" ");
-					String currency = ss[1];
-					StockClient.stopClientHandler(minuteBarBases.get(currency), this);
+					String currency = null;
+					if (ss.length > 1) {
+						currency = ss[1];
+					} else {
+						this.write("{\"error\":\"no currency pair\"}");
+						continue;
+					}
+					MinuteBarBase barBase = minuteBarBases.get(currency);
+					if (barBase != null)
+						StockClient.stopClientHandler(barBase, this);
 					logger.info("unsubscribed");
 				} else
-					this.write("not authorized");
+					this.write("{\"error\":\"not authorized\"}");
 			} else {
-
+				this.write("{\"error\":\"unidentified command\"}");
 			}
 		}
 	}
 
 	public void write(String message) throws IOException {
 		if (output == null)
-			output = new PrintWriter(new OutputStreamWriter(this.socket.getOutputStream()), true);
+			output = new PrintWriter(socket.getOutputStream(), true);
 		// write the message on the client output
-		output.write(message + '\n');
+		output.println(message);
 	}
 
+	@Override
+	protected void finalize() throws Throwable {
+		// TODO Auto-generated method stub
+		super.finalize();
+		this.output.close();
+		this.input.close();
+	}
 }

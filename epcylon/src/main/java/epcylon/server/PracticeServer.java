@@ -13,18 +13,29 @@ public class PracticeServer {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		PracticeServer practiceServer = new PracticeServer();
-		try {
-			practiceServer.startServer();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		practiceServer.startServer();
 	}
 
 	private volatile Boolean repeat = true;
 	private ServerSocket serverSocket;
 
-	public void startServer() throws IOException {
+	public void startServer() {
+		final PracticeServer practiceServer = this;
+		new Thread(new Runnable() {
+
+			public void run() {
+				// TODO Auto-generated method stub
+				try {
+					practiceServer.startServer2();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	}
+
+	public void startServer2() throws IOException {
 		try {
 			serverSocket = new ServerSocket(10000);
 			logger.info("The srever is running on 10000");
