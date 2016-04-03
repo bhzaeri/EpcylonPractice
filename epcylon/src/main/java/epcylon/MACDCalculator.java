@@ -44,6 +44,11 @@ public class MACDCalculator {
 		if (a1 != null && a2 != null)
 			_9.add(a1 - a2, timeStamp);
 		Double ema_9 = _9.getEma();
+		if (clientHandlers.size() > 1) {
+			@SuppressWarnings("unused")
+			int index = 0;
+			index++;
+		}
 		if (ema_9 != null)
 			try {
 				for (ClientHandler clientHandler : clientHandlers) {
@@ -62,25 +67,30 @@ public class MACDCalculator {
 		private String timeStamp;
 		private String pair;
 		private Double signal;
+
 		public String getTimeStamp() {
 			return timeStamp;
 		}
+
 		public void setTimeStamp(String timeStamp) {
 			this.timeStamp = timeStamp;
 		}
+
 		public String getPair() {
 			return pair;
 		}
+
 		public void setPair(String pair) {
 			this.pair = pair;
 		}
+
 		public Double getSignal() {
 			return signal;
 		}
+
 		public void setSignal(Double signal) {
 			this.signal = signal;
 		}
-		
-		
+
 	}
 }
