@@ -18,8 +18,16 @@ public class ClientHandler {
 
 	private static Logger logger = Logger.getLogger(ClientHandler.class);
 
-	private static String errorMessage(CurrencyPair currencyPair) {
-		return currencyPair.getPair() + " is ivalid.";
+	private static String errorMessage() {
+		return "currency is ivalid.";
+	}
+
+	public static Integer tryParseInt(String value) {
+		try {
+			return Integer.parseInt(value);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	public ClientHandler(Socket socket) {
@@ -74,7 +82,7 @@ public class ClientHandler {
 					this.write("{\"error\":\"no password.\"}");
 					continue;
 				}
-				if ("iamprogrammerihavenolife".equals(password)) {
+				if ("123".equals(password)) {
 					isLoggedIn = true;
 					logger.info(socket.getLocalSocketAddress() + " : logged in successfully");
 					this.write("{\"connected\":true}");
@@ -93,18 +101,22 @@ public class ClientHandler {
 						this.write("{\"error\":\"no currency pair\"}");
 						continue;
 					}
-					int minuteBarBase;
+					Integer minuteBarBase;
 					if (ss.length > 2)
-						minuteBarBase = Integer.parseInt(ss[2]);
+						minuteBarBase = tryParseInt(ss[2]);
 					else {
 						this.write("{\"error\":\"no minute bar\"}");
 						continue;
 					}
 					if (currency == null) {
-						this.write("{\"error\":\"" + errorMessage(currency) + "\"}");
+						this.write("{\"error\":\"" + errorMessage() + "\"}");
 						continue;
 					}
-					if (findMinuteBar(currency) != null) {
+					if (minuteBarBase == null) {
+						this.write("{\"error\":\"invalid minute bar\"}");
+						continue;
+					}
+					if (findMinuteBar(currency) == null) {
 						MinuteBar.addClientHandler(minuteBarBase, currency, this);
 						this.minuteBarBases.add(MinuteBarsEnum.getValue(minuteBarBase, currency));
 						logger.info("subscribed");
@@ -122,7 +134,7 @@ public class ClientHandler {
 						continue;
 					}
 					if (currency == null) {
-						this.write("{\"error\":\"" + errorMessage(currency) + "\"}");
+						this.write("{\"error\":\"" + errorMessage() + "\"}");
 						continue;
 					}
 					MinuteBarsEnum barsEnum = findMinuteBar(currency);

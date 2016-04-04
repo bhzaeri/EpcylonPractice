@@ -57,9 +57,9 @@ public class MinuteBar {
 	}
 
 	public MinuteBar(int minutes, int seconds, MACDCalculator macdCalculator) {
-		this.minutes = minutes;
+		this.minutes = seconds;
 		this.macdCalculator = macdCalculator;
-		this.seconds = seconds;
+		this.seconds = minutes;
 	}
 
 	private MACDCalculator macdCalculator;

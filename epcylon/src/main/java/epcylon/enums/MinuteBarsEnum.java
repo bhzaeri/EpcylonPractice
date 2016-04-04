@@ -23,7 +23,7 @@ public enum MinuteBarsEnum {
 	
 	public static MinuteBarsEnum getValue(Integer minuteBar, CurrencyPair pair){
 		for (MinuteBarsEnum barsEnum : MinuteBarsEnum.values()) {
-			if(barsEnum.getMinute().equals(minuteBar) && barsEnum.equals(pair))
+			if(barsEnum.getMinute().equals(minuteBar) && barsEnum.getPair().equals(pair))
 				return barsEnum;
 		}
 		return null;

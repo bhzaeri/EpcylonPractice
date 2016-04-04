@@ -22,7 +22,7 @@ public class StockClient {
 	private static Map<CurrencyPair, StockClient> stockClients = null;
 	private static Boolean isStarted = false;
 
-	public synchronized static StockClient getInstance(CurrencyPair currencyPair)  {
+	public synchronized static StockClient getInstance(CurrencyPair currencyPair) {
 		if (stockClients == null) {
 			stockClients = new HashMap<CurrencyPair, StockClient>();
 			for (CurrencyPair pair : CurrencyPair.values()) {
@@ -33,16 +33,23 @@ public class StockClient {
 		return instance;
 	}
 
-	public static void initialize()  {
+	public static void initialize() {
 		MinuteBar.initialize();
 	}
 
 	public synchronized static void start() {
 		if (!isStarted) {
-			stockClients.get(null);
+			getInstance(null);
 			initialize();
-			for (CurrencyPair currencyPair : CurrencyPair.values()) {
-				stockClients.get(currencyPair).startReceiveTickData();
+			for (final CurrencyPair currencyPair : CurrencyPair.values()) {
+				new Thread(new Runnable() {
+					public void run() {
+						// TODO Auto-generated method stub
+						// while (true) {
+						stockClients.get(currencyPair).startReceiveTickData();
+						// }
+					}
+				}).start();
 			}
 			isStarted = true;
 		}
@@ -110,8 +117,8 @@ public class StockClient {
 		Socket clientSocket = null;
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			// clientSocket = new Socket("practiceproblem.epcylon.com", 80);
-			clientSocket = new Socket("localhost", 10002);
+			clientSocket = new Socket("practiceproblem.epcylon.com", 80);
+			// clientSocket = new Socket("localhost", 10002);
 			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			sentence = "login fiInKuFbMzUQtqiCXfJbuowMgFEzJcguLXMirmsfGjfsJMdF";
@@ -120,11 +127,15 @@ public class StockClient {
 			logger.info("FROM SERVER: " + response);
 			sentence = "subscribe " + currency;
 			outToServer.writeBytes(sentence + '\n');
+			int i = 0;
 			while (receiving) {
-				response = inFromServer.readLine();
-				if (response.contains("error"))
+				// response = inFromServer.readLine();
+				Thread.sleep(1500);
+				if (i >= Util.lines.length)
 					break;
-
+				response = Util.lines[i++];
+				if (response == null || response.contains("error"))
+					break;
 				Boolean dataIsValid = true;
 				StockData data = null;
 				try {
@@ -150,7 +161,7 @@ public class StockClient {
 				receiving = false;
 				if (clientSocket != null) {
 					clientSocket.close();
-					System.out.println("Connection closed!");
+					logger.info("Connection closed!");
 					// this.startReceiveTickData();
 				}
 			} catch (IOException e) {

@@ -1,6 +1,7 @@
 package epcylon;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
 
@@ -48,19 +49,15 @@ public class MACDCalculator {
 		if (a1 != null && a2 != null)
 			_9.add(a1 - a2, timeStamp);
 		Double ema_9 = _9.getEma();
-		if (clientHandlers.size() > 1) {
-			@SuppressWarnings("unused")
-			int index = 0;
-			index++;
-		}
 		if (ema_9 != null)
 			try {
+//				BigDecimal b = new BigDecimal(ema_9);
+//				b = b.setScale(2, BigDecimal.ROUND_HALF_DOWN);
 				for (ClientHandler clientHandler : clientHandlers) {
 					String json = "{\"timeStamp\":\"" + timeStamp + "\",\"pair\":\"" + minuteBarBase.getPair().getPair()
 							+ "\",\"signal\":" + ema_9.toString() + "}";
 					clientHandler.write(json);
 					logger.info("Data sent to client");
-					Class1 data = new ObjectMapper().readValue(json, Class1.class);
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
