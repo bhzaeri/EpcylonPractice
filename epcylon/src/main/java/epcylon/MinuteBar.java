@@ -4,28 +4,40 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.log4j.Logger;
-
+import epcylon.enums.CurrencyPair;
+import epcylon.enums.MinuteBarsEnum;
 import epcylon.server.ClientHandler;
 
 public class MinuteBar {
 
-	private static Map<MinuteBarBase, MinuteBar> instances;
+	private static Map<MinuteBarsEnum, MinuteBar> instances2;
 
-	public synchronized static MinuteBar getInstance(MinuteBarBase minuteBase, ClientHandler clientHandler) {
-		if (instances == null) {
-			instances = new HashMap<MinuteBarBase, MinuteBar>();
+	public synchronized static void initialize() {
+		if (instances2 == null) {
+			instances2 = new HashMap<MinuteBarsEnum, MinuteBar>();
+			for (MinuteBarsEnum barsEnum : MinuteBarsEnum.values()) {
+				MinuteBar bar = new MinuteBar(barsEnum.getMinute(), 0, new MACDCalculator(barsEnum));
+				instances2.put(barsEnum, bar);
+				StockClient stockClient = StockClient.getInstance(barsEnum.getPair());
+				stockClient.add(bar);
+			}
 		}
-		MinuteBar instance = instances.get(minuteBase);
-		if (instance == null) {
-			instance = new MinuteBar(minuteBase.getMinuteBase(), minuteBase.getSecondBase(),
-					new MACDCalculator(minuteBase));
-			instances.put(minuteBase, instance);
-		}
+	}
+
+	public synchronized static MinuteBar getInstance(MinuteBarsEnum barsEnum) {
+		initialize();
+		return instances2.get(barsEnum);
+	}
+
+	public synchronized static MinuteBar addClientHandler(Integer minuteBarBase, CurrencyPair currency,
+			ClientHandler clientHandler) {
+
+		MinuteBarsEnum minuteBarsEnum = MinuteBarsEnum.getValue(minuteBarBase, currency);
+		MinuteBar minuteBar = getInstance(minuteBarsEnum);
 		if (clientHandler != null)
-			instance.macdCalculator.addClientHandler(clientHandler);
-		return instance;
+			minuteBar.macdCalculator.addClientHandler(clientHandler);
+		return minuteBar;
 	}
 
 	private static Logger logger = Logger.getLogger(MinuteBar.class);
@@ -146,12 +158,12 @@ public class MinuteBar {
 			lastTickData = tickData;
 		}
 
-//		logger.info(min + " -- " + sec);
+		// logger.info(min + " -- " + sec);
 	}
 
-	public void addClientHandler(ClientHandler clientHandler) {
-		this.macdCalculator.addClientHandler(clientHandler);
-	}
+	// public void addClientHandler2(ClientHandler clientHandler) {
+	// this.macdCalculator.addClientHandler(clientHandler);
+	// }
 
 	public void removeClientHandler(ClientHandler clientHandler) {
 		this.macdCalculator.removeClientHandler(clientHandler);

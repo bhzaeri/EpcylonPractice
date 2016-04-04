@@ -17,8 +17,8 @@ public class Test {
 		Socket clientSocket = null;
 		try {
 			// ObjectMapper mapper = new ObjectMapper();
-			clientSocket = new Socket("137.207.234.97", 10000);
-			// clientSocket = new Socket("127.0.0.1", 10000);
+			// clientSocket = new Socket("137.207.234.97", 10000);
+			clientSocket = new Socket("127.0.0.1", 10000);
 
 			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -27,7 +27,7 @@ public class Test {
 			response = inFromServer.readLine();
 			System.out.println("FROM SERVER: " + response);
 
-			sentence = "subscribe USD-JPY 1";
+			sentence = "subscribe USD-CAD 1";
 			outToServer.writeBytes(sentence + '\n');
 
 			while (true) {

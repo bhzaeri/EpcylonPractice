@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import epcylon.StockClient.StockData;
+import epcylon.enums.MinuteBarsEnum;
 import epcylon.server.ClientHandler;
 
 public class MACDCalculator {
@@ -19,7 +20,7 @@ public class MACDCalculator {
 
 	}
 
-	public MACDCalculator(MinuteBarBase barBase) {
+	public MACDCalculator(MinuteBarsEnum barBase) {
 		_12 = new Calculator(12);
 		_26 = new Calculator(26);
 		_9 = new Calculator(9);
@@ -27,7 +28,7 @@ public class MACDCalculator {
 		this.minuteBarBase = barBase;
 	}
 
-	final MinuteBarBase minuteBarBase;
+	final MinuteBarsEnum minuteBarBase;
 	final List<ClientHandler> clientHandlers;
 	final private Calculator _12;
 	final private Calculator _26;
@@ -55,7 +56,7 @@ public class MACDCalculator {
 		if (ema_9 != null)
 			try {
 				for (ClientHandler clientHandler : clientHandlers) {
-					String json = "{\"timeStamp\":\"" + timeStamp + "\",\"pair\":\"" + minuteBarBase.getCurrency()
+					String json = "{\"timeStamp\":\"" + timeStamp + "\",\"pair\":\"" + minuteBarBase.getPair().getPair()
 							+ "\",\"signal\":" + ema_9.toString() + "}";
 					clientHandler.write(json);
 					logger.info("Data sent to client");

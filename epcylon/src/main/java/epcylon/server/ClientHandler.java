@@ -1,29 +1,26 @@
 package epcylon.server;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
 import epcylon.MinuteBar;
-import epcylon.MinuteBarBase;
 import epcylon.StockClient;
-import epcylon.exceptions.CurrencyPairInvalidException;
+import epcylon.enums.CurrencyPair;
+import epcylon.enums.MinuteBarsEnum;
 
 public class ClientHandler {
 
 	private static Logger logger = Logger.getLogger(ClientHandler.class);
+
+	private static String errorMessage(CurrencyPair currencyPair) {
+		return currencyPair.getPair() + " is ivalid.";
+	}
 
 	public ClientHandler(Socket socket) {
 		this.socket = socket;
@@ -36,15 +33,24 @@ public class ClientHandler {
 	private Boolean flag2 = true;
 	private BufferedReader input = null;
 	private PrintWriter output = null;
-	private Map<String, MinuteBarBase> minuteBarBases = new HashMap<String, MinuteBarBase>();
+	private Vector<MinuteBarsEnum> minuteBarBases = new Vector<MinuteBarsEnum>();
 
-	public synchronized void addBarBase(MinuteBarBase barBase) {
-		this.minuteBarBases.put(barBase.getCurrency(), barBase);
+	private MinuteBarsEnum findMinuteBar(CurrencyPair pair) {
+		for (MinuteBarsEnum minuteBarsEnum : minuteBarBases) {
+			if (minuteBarsEnum.getPair().equals(pair))
+				return minuteBarsEnum;
+		}
+		return null;
 	}
 
-	public synchronized void removeBarBase(MinuteBarBase barBase) {
-		this.minuteBarBases.remove(barBase.getCurrency());
-	}
+	// public synchronized void addBarBase(Integer minuteBarBase,CurrencyPair
+	// currency) {
+	// this.minuteBarBases.add(barBase.getCurrency(), barBase);
+	// }
+	//
+	// public synchronized void removeBarBase(MinuteBarBase barBase) {
+	// this.minuteBarBases.remove(barBase.getCurrency());
+	// }
 
 	public void startListen() throws IOException {
 		if (input == null)
@@ -53,8 +59,8 @@ public class ClientHandler {
 			String clientSentence = input.readLine();
 			if (clientSentence == null) {
 				flag1 = false;
-				for (String currency : minuteBarBases.keySet()) {
-					StockClient.stopClientHandler(minuteBarBases.get(currency), this);
+				for (MinuteBarsEnum barsEnum : minuteBarBases) {
+					StockClient.stopClientHandler(barsEnum, this);
 				}
 				break;
 			}
@@ -80,31 +86,27 @@ public class ClientHandler {
 			} else if (temp.startsWith("subscribe")) {
 				if (this.isLoggedIn) {
 					String[] ss = temp.split(" ");
-					String currency = "";
+					CurrencyPair currency = null;
 					if (ss.length > 1)
-						currency = ss[1];
+						currency = CurrencyPair.getValue(ss[1]);
 					else {
 						this.write("{\"error\":\"no currency pair\"}");
 						continue;
 					}
-					int minuteBase;
+					int minuteBarBase;
 					if (ss.length > 2)
-						minuteBase = Integer.parseInt(ss[2]);
+						minuteBarBase = Integer.parseInt(ss[2]);
 					else {
 						this.write("{\"error\":\"no minute bar\"}");
 						continue;
 					}
-					MinuteBarBase barBase = new MinuteBarBase(currency, 0, 15);
-					if (!minuteBarBases.containsKey(currency)) {
-						try {
-							StockClient.start(barBase, this);
-						} catch (CurrencyPairInvalidException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							this.write("{\"error\":\"" + e.getMessage() + "\"}");
-							continue;
-						}
-						this.minuteBarBases.put(barBase.getCurrency(), barBase);
+					if (currency == null) {
+						this.write("{\"error\":\"" + errorMessage(currency) + "\"}");
+						continue;
+					}
+					if (findMinuteBar(currency) != null) {
+						MinuteBar.addClientHandler(minuteBarBase, currency, this);
+						this.minuteBarBases.add(MinuteBarsEnum.getValue(minuteBarBase, currency));
 						logger.info("subscribed");
 					}
 				} else
@@ -112,16 +114,20 @@ public class ClientHandler {
 			} else if (temp.startsWith("unsubscribe")) {
 				if (this.isLoggedIn) {
 					String[] ss = temp.split(" ");
-					String currency = null;
+					CurrencyPair currency = null;
 					if (ss.length > 1) {
-						currency = ss[1];
+						currency = CurrencyPair.getValue(ss[1]);
 					} else {
 						this.write("{\"error\":\"no currency pair\"}");
 						continue;
 					}
-					MinuteBarBase barBase = minuteBarBases.get(currency);
-					if (barBase != null)
-						StockClient.stopClientHandler(barBase, this);
+					if (currency == null) {
+						this.write("{\"error\":\"" + errorMessage(currency) + "\"}");
+						continue;
+					}
+					MinuteBarsEnum barsEnum = findMinuteBar(currency);
+					if (barsEnum != null)
+						StockClient.stopClientHandler(barsEnum, this);
 					logger.info("unsubscribed");
 				} else
 					this.write("{\"error\":\"not authorized\"}");
@@ -134,13 +140,7 @@ public class ClientHandler {
 	public void write(final String message) throws IOException {
 		if (output == null)
 			output = new PrintWriter(socket.getOutputStream(), true);
-		// new Thread(new Runnable() {
-		// public void run() {
-		// TODO Auto-generated method stub
-		// write the message on the client output
 		output.println(message);
-		// }
-		// }).start();
 	}
 
 	@Override

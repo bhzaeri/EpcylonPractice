@@ -8,11 +8,10 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
-
-import epcylon.exceptions.CurrencyPairInvalidException;
+import epcylon.enums.CurrencyPair;
+import epcylon.enums.MinuteBarsEnum;
 import epcylon.server.ClientHandler;
 
 public class StockClient {
@@ -20,46 +19,54 @@ public class StockClient {
 	private static Logger logger = Logger.getLogger(StockClient.class);
 	public static String ERROR_RESPONSE = "{\"error\":\"invalid currency pair.\"}\n";
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		new StockClient("USD-CAD").startReceiveTickData();
-	}
+	private static Map<CurrencyPair, StockClient> stockClients = null;
+	private static Boolean isStarted = false;
 
-	private static Map<String, StockClient> stockClients = null;
-
-	public synchronized static StockClient getInstance(String currency) {
+	public synchronized static StockClient getInstance(CurrencyPair currencyPair)  {
 		if (stockClients == null) {
-			stockClients = new HashMap<String, StockClient>();
-			stockClients.put("AUD-­USD", new StockClient("AUD-­USD"));
-			stockClients.put("EUR-­USD", new StockClient("EUR-­USD"));
-			stockClients.put("USD-JPY", new StockClient("­USD-JPY"));
-			stockClients.put("USD-CAD", new StockClient("USD-CAD"));
+			stockClients = new HashMap<CurrencyPair, StockClient>();
+			for (CurrencyPair pair : CurrencyPair.values()) {
+				stockClients.put(pair, new StockClient(pair.getPair()));
+			}
 		}
-		StockClient instance = stockClients.get(currency);
-		// if (instance == null) {
-		// instance = new StockClient(currency);
-		// stockClients.put(currency, instance);
-		// }
+		StockClient instance = stockClients.get(currencyPair);
 		return instance;
 	}
 
-	public static void start(MinuteBarBase barBase, ClientHandler clientHandler) throws CurrencyPairInvalidException {
-		final StockClient stockClient = StockClient.getInstance(barBase.getCurrency());
-		if (stockClient == null)
-			throw new CurrencyPairInvalidException(barBase.getCurrency());
-		MinuteBar minuteBar = MinuteBar.getInstance(barBase, clientHandler);
-		stockClient.add(minuteBar);
-		logger.info(barBase.getCurrency() + " :: is running");
-		new Thread(new Runnable() {
-			public void run() {
-				// TODO Auto-generated method stub
-				stockClient.startReceiveTickData();
-			}
-		}).start();
+	public static void initialize()  {
+		MinuteBar.initialize();
 	}
 
-	public static void stopClientHandler(MinuteBarBase minuteBase, ClientHandler clientHandler) {
-		MinuteBar minuteBar = MinuteBar.getInstance(minuteBase, clientHandler);
+	public synchronized static void start() {
+		if (!isStarted) {
+			stockClients.get(null);
+			initialize();
+			for (CurrencyPair currencyPair : CurrencyPair.values()) {
+				stockClients.get(currencyPair).startReceiveTickData();
+			}
+			isStarted = true;
+		}
+	}
+
+	// public static void start(MinuteBarBase barBase, ClientHandler
+	// clientHandler) throws CurrencyPairInvalidException {
+	// final StockClient stockClient =
+	// StockClient.getInstance(barBase.getCurrency());
+	// if (stockClient == null)
+	// throw new CurrencyPairInvalidException(barBase.getCurrency());
+	// MinuteBar minuteBar = MinuteBar.getInstance(barBase, clientHandler);
+	// stockClient.add(minuteBar);
+	// logger.info(barBase.getCurrency() + " :: is running");
+	// new Thread(new Runnable() {
+	// public void run() {
+	// // TODO Auto-generated method stub
+	// stockClient.startReceiveTickData();
+	// }
+	// }).start();
+	// }
+
+	public static void stopClientHandler(MinuteBarsEnum barsEnum, ClientHandler clientHandler) {
+		MinuteBar minuteBar = MinuteBar.getInstance(barsEnum);
 		minuteBar.removeClientHandler(clientHandler);
 	}
 
@@ -103,7 +110,8 @@ public class StockClient {
 		Socket clientSocket = null;
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			clientSocket = new Socket("practiceproblem.epcylon.com", 80);
+			// clientSocket = new Socket("practiceproblem.epcylon.com", 80);
+			clientSocket = new Socket("localhost", 10002);
 			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			sentence = "login fiInKuFbMzUQtqiCXfJbuowMgFEzJcguLXMirmsfGjfsJMdF";
@@ -112,22 +120,26 @@ public class StockClient {
 			logger.info("FROM SERVER: " + response);
 			sentence = "subscribe " + currency;
 			outToServer.writeBytes(sentence + '\n');
-			int i = 0;
 			while (receiving) {
-				// Thread.sleep(1000);
-				if (i >= Util.lines.length)
-					break;
-				response = Util.lines[i++];
-				// response = inFromServer.readLine();
+				response = inFromServer.readLine();
 				if (response.contains("error"))
 					break;
-				StockData data = mapper.readValue(response, StockData.class);
 
-				synchronized (lock1) {
-					for (MinuteBar minuteBar : minuteBars) {
-						minuteBar.getTickData(data.quote.data.last, data.quote.time);
-					}
+				Boolean dataIsValid = true;
+				StockData data = null;
+				try {
+					data = mapper.readValue(response, StockData.class);
+				} catch (Exception ex) {
+					dataIsValid = false;
+					ex.printStackTrace();
 				}
+
+				if (dataIsValid)
+					synchronized (lock1) {
+						for (MinuteBar minuteBar : minuteBars) {
+							minuteBar.getTickData(data.quote.data.last, data.quote.time);
+						}
+					}
 
 				// logger.info("FROM SERVER: " + response);
 			}
