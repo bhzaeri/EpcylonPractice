@@ -44,9 +44,11 @@ public class ClientHandler {
 	private Vector<MinuteBarsEnum> minuteBarBases = new Vector<MinuteBarsEnum>();
 
 	private MinuteBarsEnum findMinuteBar(CurrencyPair pair) {
-		for (MinuteBarsEnum minuteBarsEnum : minuteBarBases) {
-			if (minuteBarsEnum.getPair().equals(pair))
-				return minuteBarsEnum;
+		synchronized (minuteBarBases) {
+			for (MinuteBarsEnum minuteBarsEnum : minuteBarBases) {
+				if (minuteBarsEnum.getPair().equals(pair))
+					return minuteBarsEnum;
+			}
 		}
 		return null;
 	}
@@ -138,8 +140,10 @@ public class ClientHandler {
 						continue;
 					}
 					MinuteBarsEnum barsEnum = findMinuteBar(currency);
-					if (barsEnum != null)
+					if (barsEnum != null) {
+						this.minuteBarBases.remove(barsEnum);
 						StockClient.stopClientHandler(barsEnum, this);
+					}
 					logger.info("unsubscribed");
 				} else
 					this.write("{\"error\":\"not authorized\"}");

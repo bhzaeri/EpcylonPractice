@@ -45,9 +45,9 @@ public class StockClient {
 				new Thread(new Runnable() {
 					public void run() {
 						// TODO Auto-generated method stub
-						// while (true) {
-						stockClients.get(currencyPair).startReceiveTickData();
-						// }
+						while (true) {
+							stockClients.get(currencyPair).startReceiveTickData();
+						}
 					}
 				}).start();
 			}
@@ -127,13 +127,13 @@ public class StockClient {
 			logger.info("FROM SERVER: " + response);
 			sentence = "subscribe " + currency;
 			outToServer.writeBytes(sentence + '\n');
-			int i = 0;
+			// int i = 0;
 			while (receiving) {
-				// response = inFromServer.readLine();
-				Thread.sleep(1500);
-				if (i >= Util.lines.length)
-					break;
-				response = Util.lines[i++];
+				response = inFromServer.readLine();
+				// Thread.sleep(1500);
+				// if (i >= Util.lines.length)
+				// break;
+				// response = Util.lines[i++];
 				if (response == null || response.contains("error"))
 					break;
 				Boolean dataIsValid = true;
@@ -151,7 +151,8 @@ public class StockClient {
 							minuteBar.getTickData(data.quote.data.last, data.quote.time);
 						}
 					}
-
+				// logger.info("minute bars length for " + currency + ": " +
+				// minuteBars.size());
 				// logger.info("FROM SERVER: " + response);
 			}
 		} catch (Exception ex) {

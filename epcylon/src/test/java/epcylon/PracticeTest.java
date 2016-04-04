@@ -26,7 +26,7 @@ public class PracticeTest {
 			response = inFromServer.readLine();
 			System.out.println("FROM SERVER: " + response);
 
-			sentence = "subscribe USD-CAD";
+			sentence = "subscribe EUR-USD";
 			outToServer.writeBytes(sentence + '\n');
 
 			for (int i = 0; i < 10; i++) {

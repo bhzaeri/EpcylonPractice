@@ -51,8 +51,10 @@ public class MACDCalculator {
 		Double ema_9 = _9.getEma();
 		if (ema_9 != null)
 			try {
-//				BigDecimal b = new BigDecimal(ema_9);
-//				b = b.setScale(2, BigDecimal.ROUND_HALF_DOWN);
+				// BigDecimal b = new BigDecimal(ema_9);
+				// b = b.setScale(2, BigDecimal.ROUND_HALF_DOWN);
+//				if (timeStamp.contains("5.000") || timeStamp.contains("0.000"))
+//					logger.info(timeStamp + " --- " + clientHandlers.size());
 				for (ClientHandler clientHandler : clientHandlers) {
 					String json = "{\"timeStamp\":\"" + timeStamp + "\",\"pair\":\"" + minuteBarBase.getPair().getPair()
 							+ "\",\"signal\":" + ema_9.toString() + "}";
