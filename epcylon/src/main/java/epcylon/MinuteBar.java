@@ -17,7 +17,7 @@ public class MinuteBar {
 		if (instances2 == null) {
 			instances2 = new HashMap<MinuteBarsEnum, MinuteBar>();
 			for (MinuteBarsEnum barsEnum : MinuteBarsEnum.values()) {
-				MinuteBar bar = new MinuteBar(0, barsEnum.getMinute(), new MACDCalculator(barsEnum));
+				MinuteBar bar = new MinuteBar(barsEnum.getMinute(), 0, new MACDCalculator(barsEnum));
 				instances2.put(barsEnum, bar);
 				StockClient stockClient = StockClient.getInstance(barsEnum.getPair());
 				stockClient.add(bar);

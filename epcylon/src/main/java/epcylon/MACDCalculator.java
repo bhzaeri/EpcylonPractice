@@ -1,14 +1,9 @@
 package epcylon;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
-
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
-
-import epcylon.StockClient.StockData;
 import epcylon.enums.MinuteBarsEnum;
 import epcylon.server.ClientHandler;
 
@@ -53,11 +48,13 @@ public class MACDCalculator {
 			try {
 				// BigDecimal b = new BigDecimal(ema_9);
 				// b = b.setScale(2, BigDecimal.ROUND_HALF_DOWN);
-//				if (timeStamp.contains("5.000") || timeStamp.contains("0.000"))
-//					logger.info(timeStamp + " --- " + clientHandlers.size());
+				// if (timeStamp.contains("5.000") ||
+				// timeStamp.contains("0.000"))
+				// logger.info(timeStamp + " --- " + clientHandlers.size());
+				String json = "{\"timeStamp\":\"" + timeStamp + "\",\"pair\":\"" + minuteBarBase.getPair().getPair()
+						+ "\",\"signal\":" + ema_9.toString() + "}";
+				logger.info("Signal sent: " + json);
 				for (ClientHandler clientHandler : clientHandlers) {
-					String json = "{\"timeStamp\":\"" + timeStamp + "\",\"pair\":\"" + minuteBarBase.getPair().getPair()
-							+ "\",\"signal\":" + ema_9.toString() + "}";
 					clientHandler.write(json);
 					logger.info("Data sent to client");
 				}
