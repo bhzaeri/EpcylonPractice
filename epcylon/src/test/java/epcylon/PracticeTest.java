@@ -11,7 +11,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import epcylon.StockClient.StockData;
 
 public class PracticeTest {
-	public static void main(String[] args) {
+
+	@org.junit.Test
+	public void main() {
 		// TODO Auto-generated method stub
 		String sentence;
 		String response;
@@ -26,13 +28,13 @@ public class PracticeTest {
 			response = inFromServer.readLine();
 			System.out.println("FROM SERVER: " + response);
 
-			sentence = "subscribe EUR-USD";
+			sentence = "subscribe USD-JPY";
 			outToServer.writeBytes(sentence + '\n');
-
-			for (int i = 0; i < 10; i++) {
+			System.out.println("Start liste...");
+			for (int i = 0; i < 10000; i++) {
 				response = inFromServer.readLine();
 				// mapper.readValue(response, StockData.class);
-				System.out.println("FROM SERVER: " + response);
+				System.out.println(i + " FROM SERVER: " + response);
 
 				// Thread.sleep(30000);
 			}
