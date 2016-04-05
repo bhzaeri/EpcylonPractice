@@ -35,7 +35,7 @@ public class MinuteBar {
 			ClientHandler clientHandler) throws MinuteBarInvalidException {
 
 		MinuteBarsEnum minuteBarsEnum = MinuteBarsEnum.getValue(minuteBarBase, currency);
-		if(minuteBarsEnum==null)
+		if (minuteBarsEnum == null)
 			throw new MinuteBarInvalidException(minuteBarBase);
 		MinuteBar minuteBar = getInstance(minuteBarsEnum);
 		if (clientHandler != null)
