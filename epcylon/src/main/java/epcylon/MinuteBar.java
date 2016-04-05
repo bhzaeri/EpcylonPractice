@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import epcylon.enums.CurrencyPair;
 import epcylon.enums.MinuteBarsEnum;
+import epcylon.exceptions.MinuteBarInvalidException;
 import epcylon.server.ClientHandler;
 
 public class MinuteBar {
@@ -31,9 +32,11 @@ public class MinuteBar {
 	}
 
 	public synchronized static MinuteBar addClientHandler(Integer minuteBarBase, CurrencyPair currency,
-			ClientHandler clientHandler) {
+			ClientHandler clientHandler) throws MinuteBarInvalidException {
 
 		MinuteBarsEnum minuteBarsEnum = MinuteBarsEnum.getValue(minuteBarBase, currency);
+		if(minuteBarsEnum==null)
+			throw new MinuteBarInvalidException(minuteBarBase);
 		MinuteBar minuteBar = getInstance(minuteBarsEnum);
 		if (clientHandler != null)
 			minuteBar.macdCalculator.addClientHandler(clientHandler);

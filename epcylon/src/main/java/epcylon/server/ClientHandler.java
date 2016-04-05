@@ -13,6 +13,7 @@ import epcylon.MinuteBar;
 import epcylon.StockClient;
 import epcylon.enums.CurrencyPair;
 import epcylon.enums.MinuteBarsEnum;
+import epcylon.exceptions.MinuteBarInvalidException;
 
 public class ClientHandler {
 
@@ -119,7 +120,14 @@ public class ClientHandler {
 						continue;
 					}
 					if (findMinuteBar(currency) == null) {
-						MinuteBar.addClientHandler(minuteBarBase, currency, this);
+						try {
+							MinuteBar.addClientHandler(minuteBarBase, currency, this);
+						} catch (MinuteBarInvalidException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							this.write("{\"error\":\"invalid minute bar\"}");
+							continue;							
+						}
 						this.minuteBarBases.add(MinuteBarsEnum.getValue(minuteBarBase, currency));
 						logger.info("subscribed");
 					}
