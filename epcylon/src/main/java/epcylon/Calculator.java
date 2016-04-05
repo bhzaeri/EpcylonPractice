@@ -92,4 +92,23 @@ public class Calculator {
 	public synchronized Double getEma() {
 		return emaList.size() > 0 ? emaList.get(emaList.size() - 1) : null;
 	}
+
+	public LastEMA getLast() {
+		LastEMA lastEMA = null;
+		if (emaList.size() > 0 && timeList.size() > 0)
+			lastEMA = new LastEMA(emaList.get(emaList.size() - 1), timeList.get(timeList.size() - 1));
+		return lastEMA;
+	}
+
+	public static class LastEMA {
+
+		public LastEMA(Double ema, String timeStamp) {
+			super();
+			this.ema = ema;
+			this.timeStamp = timeStamp;
+		}
+
+		Double ema;
+		String timeStamp;
+	}
 }

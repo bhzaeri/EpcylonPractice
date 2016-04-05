@@ -84,7 +84,7 @@ public class ClientHandler {
 					this.write("{\"error\":\"no password.\"}");
 					continue;
 				}
-				if ("123".equals(password)) {
+				if ("iamprogrammerihavenolife".equals(password)) {
 					isLoggedIn = true;
 					logger.info(socket.getLocalSocketAddress() + " : logged in successfully");
 					this.write("{\"connected\":true}");

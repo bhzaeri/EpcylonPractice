@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 import org.apache.log4j.Logger;
+
+import epcylon.Calculator.LastEMA;
 import epcylon.enums.MinuteBarsEnum;
 import epcylon.server.ClientHandler;
 
@@ -32,6 +34,18 @@ public class MACDCalculator {
 
 	public synchronized void addClientHandler(ClientHandler clientHandler) {
 		this.clientHandlers.add(clientHandler);
+		LastEMA lastEMA = _9.getLast();
+		if (lastEMA != null) {
+			String json = "{\"timeStamp\":\"" + lastEMA.timeStamp + "\",\"pair\":\"" + minuteBarBase.getPair().getPair()
+					+ "\",\"minuteBar\":" + minuteBarBase.getMinute() + ",\"signal\":" + lastEMA.ema.toString() + "}";
+			logger.info("Signal sent: " + json);
+			try {
+				clientHandler.write(json);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public synchronized void removeClientHandler(ClientHandler clientHandler) {
@@ -39,6 +53,7 @@ public class MACDCalculator {
 	}
 
 	public synchronized void add(Double newValue, String timeStamp) {
+
 		Double a1 = _12.add(newValue, timeStamp);
 		Double a2 = _26.add(newValue, timeStamp);
 		if (a1 != null && a2 != null)
@@ -52,7 +67,7 @@ public class MACDCalculator {
 				// timeStamp.contains("0.000"))
 				// logger.info(timeStamp + " --- " + clientHandlers.size());
 				String json = "{\"timeStamp\":\"" + timeStamp + "\",\"pair\":\"" + minuteBarBase.getPair().getPair()
-						+ "\",\"signal\":" + ema_9.toString() + "}";
+						+ "\",\"minuteBar\":" + minuteBarBase.getMinute() + ",\"signal\":" + ema_9.toString() + "}";
 				logger.info("Signal sent: " + json);
 				for (ClientHandler clientHandler : clientHandlers) {
 					clientHandler.write(json);
@@ -68,6 +83,15 @@ public class MACDCalculator {
 		private String timeStamp;
 		private String pair;
 		private Double signal;
+		private Integer minuteBar;
+
+		public Integer getMinuteBar() {
+			return minuteBar;
+		}
+
+		public void setMinuteBar(Integer minuteBar) {
+			this.minuteBar = minuteBar;
+		}
 
 		public String getTimeStamp() {
 			return timeStamp;
