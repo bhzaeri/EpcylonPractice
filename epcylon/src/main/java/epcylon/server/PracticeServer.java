@@ -56,6 +56,7 @@ public class PracticeServer {
 							if (socket != null)
 								try {
 									socket.close();
+									logger.info("CLIENT CLOSED!");
 								} catch (IOException e) {
 									e.printStackTrace();
 								}
@@ -71,13 +72,11 @@ public class PracticeServer {
 		}
 	}
 
-	
 	@Override
 	protected void finalize() throws Throwable {
 		// TODO Auto-generated method stub
 		super.finalize();
-		if (serverSocket != null)
-		{
+		if (serverSocket != null) {
 			serverSocket.close();
 			logger.info("Server shut down.");
 		}
