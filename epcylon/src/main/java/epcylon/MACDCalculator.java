@@ -68,10 +68,10 @@ public class MACDCalculator {
 				// logger.info(timeStamp + " --- " + clientHandlers.size());
 				String json = "{\"timeStamp\":\"" + timeStamp + "\",\"pair\":\"" + minuteBarBase.getPair().getPair()
 						+ "\",\"minuteBar\":" + minuteBarBase.getMinute() + ",\"signal\":" + ema_9.toString() + "}";
-//				logger.info("Signal sent: " + json);
+				// logger.info("Signal sent: " + json);
 				for (ClientHandler clientHandler : clientHandlers) {
 					clientHandler.write(json);
-//					logger.info("Data sent to client");
+					logger.info("Data sent to client");
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

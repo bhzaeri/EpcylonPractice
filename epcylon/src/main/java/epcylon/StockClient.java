@@ -1,6 +1,7 @@
 package epcylon;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -42,11 +43,12 @@ public class StockClient {
 			getInstance(null);
 			initialize();
 			for (final CurrencyPair currencyPair : CurrencyPair.values()) {
+				final StockClient sc = stockClients.get(currencyPair);
 				new Thread(new Runnable() {
 					public void run() {
 						// TODO Auto-generated method stub
 						while (true) {
-							stockClients.get(currencyPair).startReceiveTickData();
+							sc.startReceiveTickData();
 						}
 					}
 				}).start();
@@ -108,12 +110,13 @@ public class StockClient {
 	}
 
 	public void startReceiveTickData() {
+		String response = null;
+		Boolean testFlag = true;
 		if (receiving) {
 			return;
 		}
 		receiving = true;
 		String sentence;
-		String response;
 		Socket clientSocket = null;
 		try {
 			ObjectMapper mapper = new ObjectMapper();
@@ -127,15 +130,20 @@ public class StockClient {
 			logger.info("FROM SERVER: " + response);
 			sentence = "subscribe " + currency;
 			outToServer.writeBytes(sentence + '\n');
+			DataInputStream g;
 			// int i = 0;
 			while (receiving) {
+				testFlag = true;
 				response = inFromServer.readLine();
+				testFlag = false;
 				// Thread.sleep(1500);
 				// if (i >= Util.lines.length)
 				// break;
 				// response = Util.lines[i++];
-				if (response == null || response.contains("error"))
+				if (response == null || response.contains("error")) {
+					logger.info("AGAIN BROKEN!!!!");
 					break;
+				}
 				Boolean dataIsValid = true;
 				StockData data = null;
 				try {
@@ -155,8 +163,8 @@ public class StockClient {
 				// minuteBars.size());
 				// logger.info("FROM SERVER: " + response);
 			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		} catch (Exception ex1) {
+			ex1.printStackTrace();
 		} finally {
 			try {
 				receiving = false;

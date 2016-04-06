@@ -28,10 +28,10 @@ public class PracticeTest {
 			response = inFromServer.readLine();
 			System.out.println("FROM SERVER: " + response);
 
-			sentence = "subscribe USD-JPY";
+			sentence = "subscribe EUR-USD";
 			outToServer.writeBytes(sentence + '\n');
 			System.out.println("Start liste...");
-			for (int i = 0; i < 10000; i++) {
+			for (int i = 0; i < 10; i++) {
 				response = inFromServer.readLine();
 				// mapper.readValue(response, StockData.class);
 				System.out.println(i + " FROM SERVER: " + response);

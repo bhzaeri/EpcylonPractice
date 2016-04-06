@@ -90,10 +90,13 @@ public class ClientHandler {
 					logger.info(socket.getLocalSocketAddress() + " : logged in successfully");
 					this.write("{\"connected\":true}");
 				} else {
-					this.write("{\"error\":\"invalid login key\"}\n<close connection>");
+					this.write("{\"error\":\"invalid login key\"}");
 					break;
 				}
 
+			} else if ("logout".equals(temp)) {
+				this.write("{\"connected\":false}");
+				break;
 			} else if (temp.startsWith("subscribe")) {
 				if (this.isLoggedIn) {
 					String[] ss = temp.split(" ");
@@ -126,7 +129,7 @@ public class ClientHandler {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 							this.write("{\"error\":\"invalid minute bar\"}");
-							continue;							
+							continue;
 						}
 						this.minuteBarBases.add(MinuteBarsEnum.getValue(minuteBarBase, currency));
 						logger.info("subscribed");
