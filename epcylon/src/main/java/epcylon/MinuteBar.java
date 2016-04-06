@@ -33,7 +33,7 @@ public class MinuteBar {
 	// return instances2.get(barsEnum);
 	// }
 
-	public synchronized static MinuteBar addClientHandler(Integer minuteBarBase, CurrencyPair currency,
+	public static MinuteBar addClientHandler(Integer minuteBarBase, CurrencyPair currency,
 			ClientHandler clientHandler) throws MinuteBarInvalidException {
 
 		MinuteBarsEnum minuteBarsEnum = MinuteBarsEnum.getValue(minuteBarBase, currency);

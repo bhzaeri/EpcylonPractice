@@ -146,15 +146,11 @@ public class StockClient2 {
 			}
 			final StockData temp = data;
 			if (dataIsValid) {
-				new Thread(new Runnable() {
-					public void run() {
-						// TODO Auto-generated method stub
-						for (Integer minuteBarValue : minuteBars.get(temp.getQuote().pair).keySet()) {
-							MinuteBar minuteBar = minuteBars.get(temp.getQuote().pair).get(minuteBarValue);
-							minuteBar.getTickData(temp.quote.data.last, temp.quote.time);
-						}
-					}
-				}).start();
+				// TODO Auto-generated method stub
+				for (Integer minuteBarValue : minuteBars.get(temp.getQuote().pair).keySet()) {
+					MinuteBar minuteBar = minuteBars.get(temp.getQuote().pair).get(minuteBarValue);
+					minuteBar.getTickData(temp.quote.data.last, temp.quote.time);
+				}
 			}
 		}
 	}

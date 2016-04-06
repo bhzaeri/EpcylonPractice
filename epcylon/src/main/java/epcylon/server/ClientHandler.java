@@ -1,12 +1,15 @@
 package epcylon.server;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 
@@ -34,20 +37,26 @@ public class ClientHandler {
 
 	public ClientHandler(Socket socket) {
 		this.socket = socket;
+		queueReader = new Thread(new MyRunnable());
+		queueReader.start();
 	}
 
 	private Socket socket;
 	private Boolean isLoggedIn = false;
 	private Boolean isSubscribed = false;
-	private Boolean flag1 = true;
+	volatile private Boolean flag1 = true;
 	private Boolean flag2 = true;
 	private BufferedReader input = null;
-	private PrintWriter output = null;
+	private DataOutputStream output = null;
 	private List<MinuteBarsEnum> bars = new Vector<MinuteBarsEnum>();
+	private BlockingQueue<String> queue = new ArrayBlockingQueue<String>(10000);
+	private Thread queueReader = null;
 
 	public void startListen() throws IOException {
 		if (input == null)
 			input = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+		if (output == null)
+			output = new DataOutputStream(socket.getOutputStream());
 		while (flag1) {
 			String clientSentence = null;
 			try {
@@ -76,12 +85,14 @@ public class ClientHandler {
 					this.write("{\"connected\":true}");
 				} else {
 					this.write("{\"error\":\"invalid login key\"}");
+					flag1 = false;
 					break;
 				}
 
 			} else if ("logout".equals(temp)) {
 				stopHandler();
 				this.write("{\"connected\":false}");
+				flag1 = false;
 				break;
 			} else if (temp.startsWith("subscribe")) {
 				if (this.isLoggedIn) {
@@ -163,9 +174,16 @@ public class ClientHandler {
 	}
 
 	public void write(final String message) throws IOException {
-		if (output == null)
-			output = new PrintWriter(socket.getOutputStream(), true);
-		output.println(message);
+		// output.writeBytes(message + '\n');
+		// output.flush();
+		try {
+			queue.put(message);
+			if (queue.remainingCapacity() < 30)
+				logger.warn("queue size is exceeding!!!!!!!!!");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -174,5 +192,25 @@ public class ClientHandler {
 		super.finalize();
 		this.output.close();
 		this.input.close();
+	}
+
+	public class MyRunnable implements Runnable {
+
+		public void run() {
+			// TODO Auto-generated method stub
+			while (flag1) {
+				try {
+					output.writeBytes(queue.take() + '\n');
+					output.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+
 	}
 }

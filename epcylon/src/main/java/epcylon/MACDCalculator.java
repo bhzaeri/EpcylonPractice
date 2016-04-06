@@ -32,7 +32,7 @@ public class MACDCalculator {
 	final private Calculator _26;
 	final private Calculator _9;
 
-	public synchronized void addClientHandler(ClientHandler clientHandler) {
+	public void addClientHandler(ClientHandler clientHandler) {
 		this.clientHandlers.add(clientHandler);
 		LastEMA lastEMA = _9.getLast();
 		if (lastEMA != null) {
@@ -48,11 +48,11 @@ public class MACDCalculator {
 		}
 	}
 
-	public synchronized void removeClientHandler(ClientHandler clientHandler) {
+	public void removeClientHandler(ClientHandler clientHandler) {
 		this.clientHandlers.remove(clientHandler);
 	}
 
-	public synchronized void add(Double newValue, String timeStamp) {
+	public void add(Double newValue, String timeStamp) {
 
 		Double a1 = _12.add(newValue, timeStamp);
 		Double a2 = _26.add(newValue, timeStamp);
@@ -69,9 +69,11 @@ public class MACDCalculator {
 				String json = "{\"timeStamp\":\"" + timeStamp + "\",\"pair\":\"" + minuteBarBase.getPair().getPair()
 						+ "\",\"minuteBar\":" + minuteBarBase.getMinute() + ",\"signal\":" + ema_9.toString() + "}";
 				// logger.info("Signal sent: " + json);
-				for (ClientHandler clientHandler : clientHandlers) {
-					clientHandler.write(json);
-					logger.info("Data sent to client");
+				synchronized (clientHandlers) {
+					for (ClientHandler clientHandler : clientHandlers) {
+						clientHandler.write(json);
+						logger.info("Data sent to client");
+					}
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
