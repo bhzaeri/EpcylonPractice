@@ -6,7 +6,7 @@ import java.net.Socket;
 
 import org.apache.log4j.Logger;
 
-import epcylon.StockClient;
+import epcylon.StockClient2;
 
 public class PracticeServer {
 
@@ -39,7 +39,7 @@ public class PracticeServer {
 
 	public void startServer2() throws IOException {
 		try {
-			StockClient.start();
+			StockClient2.getInstance().start();
 			serverSocket = new ServerSocket(10000);
 			logger.info("The srever is running on 10000");
 			while (repeat) {

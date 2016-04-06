@@ -14,22 +14,24 @@ public class MinuteBar {
 
 	private static Map<MinuteBarsEnum, MinuteBar> instances2;
 
-	public synchronized static void initialize() {
-		if (instances2 == null) {
-			instances2 = new HashMap<MinuteBarsEnum, MinuteBar>();
-			for (MinuteBarsEnum barsEnum : MinuteBarsEnum.values()) {
-				MinuteBar bar = new MinuteBar(barsEnum.getMinute(), 0, new MACDCalculator(barsEnum));
-				instances2.put(barsEnum, bar);
-				StockClient stockClient = StockClient.getInstance(barsEnum.getPair());
-				stockClient.add(bar);
-			}
-		}
-	}
+	// public synchronized static void initialize() {
+	// if (instances2 == null) {
+	// instances2 = new HashMap<MinuteBarsEnum, MinuteBar>();
+	// for (MinuteBarsEnum barsEnum : MinuteBarsEnum.values()) {
+	// MinuteBar bar = new MinuteBar(barsEnum.getMinute(), 0, new
+	// MACDCalculator(barsEnum));
+	// instances2.put(barsEnum, bar);
+	// StockClient stockClient = StockClient.getInstance(barsEnum.getPair());
+	// stockClient.add(bar);
+	// }
+	// }
+	// }
 
-	public synchronized static MinuteBar getInstance(MinuteBarsEnum barsEnum) {
-		initialize();
-		return instances2.get(barsEnum);
-	}
+	// public synchronized static MinuteBar getInstance(MinuteBarsEnum barsEnum)
+	// {
+	// initialize();
+	// return instances2.get(barsEnum);
+	// }
 
 	public synchronized static MinuteBar addClientHandler(Integer minuteBarBase, CurrencyPair currency,
 			ClientHandler clientHandler) throws MinuteBarInvalidException {
@@ -37,7 +39,8 @@ public class MinuteBar {
 		MinuteBarsEnum minuteBarsEnum = MinuteBarsEnum.getValue(minuteBarBase, currency);
 		if (minuteBarsEnum == null)
 			throw new MinuteBarInvalidException(minuteBarBase);
-		MinuteBar minuteBar = getInstance(minuteBarsEnum);
+		MinuteBar minuteBar = StockClient2.getInstance().getMinuteBars().get(currency.getPair()).get(minuteBarBase);
+		// MinuteBar minuteBar = getInstance(minuteBarsEnum);
 		if (clientHandler != null)
 			minuteBar.macdCalculator.addClientHandler(clientHandler);
 		return minuteBar;

@@ -8,8 +8,6 @@ import java.net.Socket;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import epcylon.StockClient.StockData;
-
 public class PracticeTest {
 
 	@org.junit.Test

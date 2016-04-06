@@ -5,12 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
 import epcylon.MinuteBar;
-import epcylon.StockClient;
+import epcylon.StockClient2;
 import epcylon.enums.CurrencyPair;
 import epcylon.enums.MinuteBarsEnum;
 import epcylon.exceptions.MinuteBarInvalidException;
@@ -42,37 +43,21 @@ public class ClientHandler {
 	private Boolean flag2 = true;
 	private BufferedReader input = null;
 	private PrintWriter output = null;
-	private Vector<MinuteBarsEnum> minuteBarBases = new Vector<MinuteBarsEnum>();
-
-	private MinuteBarsEnum findMinuteBar(CurrencyPair pair) {
-		synchronized (minuteBarBases) {
-			for (MinuteBarsEnum minuteBarsEnum : minuteBarBases) {
-				if (minuteBarsEnum.getPair().equals(pair))
-					return minuteBarsEnum;
-			}
-		}
-		return null;
-	}
-
-	// public synchronized void addBarBase(Integer minuteBarBase,CurrencyPair
-	// currency) {
-	// this.minuteBarBases.add(barBase.getCurrency(), barBase);
-	// }
-	//
-	// public synchronized void removeBarBase(MinuteBarBase barBase) {
-	// this.minuteBarBases.remove(barBase.getCurrency());
-	// }
+	private List<MinuteBarsEnum> bars = new Vector<MinuteBarsEnum>();
 
 	public void startListen() throws IOException {
 		if (input == null)
 			input = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 		while (flag1) {
-			String clientSentence = input.readLine();
+			String clientSentence = null;
+			try {
+				clientSentence = input.readLine();
+			} catch (Exception ex) {
+				clientSentence = null;
+			}
 			if (clientSentence == null) {
 				flag1 = false;
-				for (MinuteBarsEnum barsEnum : minuteBarBases) {
-					StockClient.stopClientHandler(barsEnum, this);
-				}
+				stopHandler();
 				break;
 			}
 			String temp = clientSentence == null ? "" : clientSentence.trim();
@@ -95,6 +80,7 @@ public class ClientHandler {
 				}
 
 			} else if ("logout".equals(temp)) {
+				stopHandler();
 				this.write("{\"connected\":false}");
 				break;
 			} else if (temp.startsWith("subscribe")) {
@@ -122,18 +108,20 @@ public class ClientHandler {
 						this.write("{\"error\":\"invalid minute bar\"}");
 						continue;
 					}
-					if (findMinuteBar(currency) == null) {
-						try {
+					try {
+						MinuteBarsEnum t = MinuteBarsEnum.getValue(minuteBarBase, currency);
+						if (!bars.contains(t)) {
 							MinuteBar.addClientHandler(minuteBarBase, currency, this);
-						} catch (MinuteBarInvalidException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							this.write("{\"error\":\"invalid minute bar\"}");
-							continue;
+							bars.add(t);
+							logger.info("subscribed");
 						}
-						this.minuteBarBases.add(MinuteBarsEnum.getValue(minuteBarBase, currency));
-						logger.info("subscribed");
+					} catch (MinuteBarInvalidException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						this.write("{\"error\":\"invalid minute bar\"}");
+						continue;
 					}
+
 				} else
 					this.write("{\"error\":\"not authorized\"}");
 			} else if (temp.startsWith("unsubscribe")) {
@@ -150,10 +138,14 @@ public class ClientHandler {
 						this.write("{\"error\":\"" + errorMessage() + "\"}");
 						continue;
 					}
-					MinuteBarsEnum barsEnum = findMinuteBar(currency);
-					if (barsEnum != null) {
-						this.minuteBarBases.remove(barsEnum);
-						StockClient.stopClientHandler(barsEnum, this);
+					StockClient2.getInstance().removeClientHandlers(currency, this);
+					synchronized (bars) {
+						for (int i = 0; i < bars.size(); i++) {
+							if (bars.get(i).getPair() == currency) {
+								bars.remove(i);
+								i--;
+							}
+						}
 					}
 					logger.info("unsubscribed");
 				} else
@@ -161,6 +153,12 @@ public class ClientHandler {
 			} else {
 				this.write("{\"error\":\"unidentified command\"}");
 			}
+		}
+	}
+
+	private void stopHandler() {
+		for (CurrencyPair currencyPair : CurrencyPair.values()) {
+			StockClient2.getInstance().removeClientHandlers(currencyPair, this);
 		}
 	}
 
