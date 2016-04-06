@@ -49,7 +49,7 @@ public class StockClient2 {
 			minuteBars.put(currencyPair.getPair(), new HashMap<Integer, MinuteBar>());
 		}
 		for (MinuteBarsEnum minuteBarsEnum : MinuteBarsEnum.values()) {
-			MinuteBar bar = new MinuteBar(minuteBarsEnum.getMinute(), 0, new MACDCalculator(minuteBarsEnum));
+			MinuteBar bar = new MinuteBar(0, minuteBarsEnum.getMinute(), new MACDCalculator(minuteBarsEnum));
 			minuteBars.get(minuteBarsEnum.getPair().getPair()).put(minuteBarsEnum.getMinute(), bar);
 		}
 	}
