@@ -6,6 +6,7 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 
 import epcylon.Calculator.LastEMA;
+import epcylon.enums.MinuteBarsEnum;
 import epcylon.server.ClientHandler;
 
 public class MACDCalculator {

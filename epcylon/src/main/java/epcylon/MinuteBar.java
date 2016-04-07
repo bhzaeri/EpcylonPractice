@@ -6,6 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
+import epcylon.enums.CurrencyPair;
+import epcylon.enums.MinuteBarsEnum;
 import epcylon.server.ClientHandler;
 
 public class MinuteBar {

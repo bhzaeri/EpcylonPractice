@@ -12,6 +12,8 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import epcylon.enums.CurrencyPair;
+import epcylon.enums.MinuteBarsEnum;
 import epcylon.server.ClientHandler;
 
 public class StockClient2 {

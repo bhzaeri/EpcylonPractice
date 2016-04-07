@@ -13,11 +13,11 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 
-import epcylon.CurrencyPair;
 import epcylon.MinuteBar;
 import epcylon.MinuteBarInvalidException;
-import epcylon.MinuteBarsEnum;
 import epcylon.StockClient2;
+import epcylon.enums.CurrencyPair;
+import epcylon.enums.MinuteBarsEnum;
 
 public class ClientHandler {
 
