@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -13,11 +13,11 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 
+import epcylon.CurrencyPair;
 import epcylon.MinuteBar;
+import epcylon.MinuteBarInvalidException;
+import epcylon.MinuteBarsEnum;
 import epcylon.StockClient2;
-import epcylon.enums.CurrencyPair;
-import epcylon.enums.MinuteBarsEnum;
-import epcylon.exceptions.MinuteBarInvalidException;
 
 public class ClientHandler {
 
@@ -37,8 +37,15 @@ public class ClientHandler {
 
 	public ClientHandler(Socket socket) {
 		this.socket = socket;
-		queueReader = new Thread(new MyRunnable());
-		queueReader.start();
+		try {
+			input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			output = new DataOutputStream(socket.getOutputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		outputQueueReader = new Thread(new MyOutputRunnable());
+		outputQueueReader.start();
 	}
 
 	private Socket socket;
@@ -49,14 +56,10 @@ public class ClientHandler {
 	private BufferedReader input = null;
 	private DataOutputStream output = null;
 	private List<MinuteBarsEnum> bars = new Vector<MinuteBarsEnum>();
-	private BlockingQueue<String> queue = new ArrayBlockingQueue<String>(10000);
-	private Thread queueReader = null;
+	private BlockingQueue<String> outputQueue = new ArrayBlockingQueue<String>(10000);
+	private Thread outputQueueReader = null;
 
 	public void startListen() throws IOException {
-		if (input == null)
-			input = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-		if (output == null)
-			output = new DataOutputStream(socket.getOutputStream());
 		while (flag1) {
 			String clientSentence = null;
 			try {
@@ -67,6 +70,7 @@ public class ClientHandler {
 			if (clientSentence == null) {
 				flag1 = false;
 				stopHandler();
+				finishOutputQueue();
 				break;
 			}
 			String temp = clientSentence == null ? "" : clientSentence.trim();
@@ -92,6 +96,7 @@ public class ClientHandler {
 			} else if ("logout".equals(temp)) {
 				stopHandler();
 				this.write("{\"connected\":false}");
+				finishOutputQueue();
 				flag1 = false;
 				break;
 			} else if (temp.startsWith("subscribe")) {
@@ -167,9 +172,18 @@ public class ClientHandler {
 		}
 	}
 
-	private void stopHandler() {
+	private void stopHandler() throws IOException {
 		for (CurrencyPair currencyPair : CurrencyPair.values()) {
 			StockClient2.getInstance().removeClientHandlers(currencyPair, this);
+		}
+	}
+
+	private void finishOutputQueue() {
+		try {
+			outputQueue.put("finished");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -177,8 +191,8 @@ public class ClientHandler {
 		// output.writeBytes(message + '\n');
 		// output.flush();
 		try {
-			queue.put(message);
-			if (queue.remainingCapacity() < 30)
+			outputQueue.put(message);
+			if (outputQueue.remainingCapacity() < 30)
 				logger.warn("queue size is exceeding!!!!!!!!!");
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -194,14 +208,25 @@ public class ClientHandler {
 		this.input.close();
 	}
 
-	public class MyRunnable implements Runnable {
+	public class MyOutputRunnable implements Runnable {
 
 		public void run() {
 			// TODO Auto-generated method stub
 			while (flag1) {
 				try {
-					output.writeBytes(queue.take() + '\n');
+					String temp = outputQueue.take();
+					if ("finished".equals(temp))
+						break;
+					output.writeBytes(temp + '\n');
 					output.flush();
+				} catch (SocketException exception) {
+					flag1 = false;
+					try {
+						stopHandler();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -210,6 +235,7 @@ public class ClientHandler {
 					e.printStackTrace();
 				}
 			}
+			logger.info("Output queue thread finished.");
 		}
 
 	}

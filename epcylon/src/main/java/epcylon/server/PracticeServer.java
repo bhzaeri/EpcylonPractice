@@ -22,6 +22,8 @@ public class PracticeServer {
 	private ServerSocket serverSocket;
 
 	public void startServer() {
+		StockClient2.getInstance().start();
+		
 		final PracticeServer practiceServer = this;
 		new Thread(new Runnable() {
 
@@ -39,16 +41,15 @@ public class PracticeServer {
 
 	public void startServer2() throws IOException {
 		try {
-			StockClient2.getInstance().start();
 			serverSocket = new ServerSocket(10000);
 			logger.info("The srever is running on 10000");
 			while (repeat) {
 				final Socket socket = serverSocket.accept();
 				logger.info("Hello! : " + socket.getRemoteSocketAddress());
+				final ClientHandler clientHandler = new ClientHandler(socket);
 				new Thread(new Runnable() {
 					public void run() {
 						try {
-							final ClientHandler clientHandler = new ClientHandler(socket);
 							clientHandler.startListen();
 						} catch (IOException exception) {
 							exception.printStackTrace();

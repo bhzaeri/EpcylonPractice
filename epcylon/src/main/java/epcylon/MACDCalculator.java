@@ -6,7 +6,6 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 
 import epcylon.Calculator.LastEMA;
-import epcylon.enums.MinuteBarsEnum;
 import epcylon.server.ClientHandler;
 
 public class MACDCalculator {
@@ -72,7 +71,7 @@ public class MACDCalculator {
 				synchronized (clientHandlers) {
 					for (ClientHandler clientHandler : clientHandlers) {
 						clientHandler.write(json);
-						logger.info("Data sent to client");
+						logger.info("Data sent to client 1");
 					}
 				}
 			} catch (IOException e) {

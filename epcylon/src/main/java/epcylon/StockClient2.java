@@ -11,8 +11,7 @@ import java.util.Map;
 import java.util.Vector;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
-import epcylon.enums.CurrencyPair;
-import epcylon.enums.MinuteBarsEnum;
+
 import epcylon.server.ClientHandler;
 
 public class StockClient2 {
@@ -49,7 +48,7 @@ public class StockClient2 {
 			minuteBars.put(currencyPair.getPair(), new HashMap<Integer, MinuteBar>());
 		}
 		for (MinuteBarsEnum minuteBarsEnum : MinuteBarsEnum.values()) {
-			MinuteBar bar = new MinuteBar(0, minuteBarsEnum.getMinute(), new MACDCalculator(minuteBarsEnum));
+			MinuteBar bar = new MinuteBar(minuteBarsEnum.getMinute(), 0, new MACDCalculator(minuteBarsEnum));
 			minuteBars.get(minuteBarsEnum.getPair().getPair()).put(minuteBarsEnum.getMinute(), bar);
 		}
 	}

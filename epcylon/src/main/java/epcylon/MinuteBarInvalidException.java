@@ -1,4 +1,4 @@
-package epcylon.exceptions;
+package epcylon;
 
 public class MinuteBarInvalidException extends Exception {
 

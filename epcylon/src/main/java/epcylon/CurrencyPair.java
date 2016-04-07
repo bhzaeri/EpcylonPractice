@@ -1,4 +1,4 @@
-package epcylon.enums;
+package epcylon;
 
 public enum CurrencyPair {
 	AUD_USD("AUD-USD"), EUR_USD("EUR-USD"), USD_JPY("USD-JPY"), USD_CAD("USD-CAD");

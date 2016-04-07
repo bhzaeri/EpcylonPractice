@@ -1,4 +1,4 @@
-package epcylon.enums;
+package epcylon;
 
 public enum MinuteBarsEnum {
 	AUD_USD_1(1,CurrencyPair.AUD_USD), AUD_USD_2(2,CurrencyPair.AUD_USD), AUD_USD_3(3,CurrencyPair.AUD_USD), AUD_USD_4(4,CurrencyPair.AUD_USD), AUD_USD_5(5,CurrencyPair.AUD_USD), AUD_USD_6(6,CurrencyPair.AUD_USD), AUD_USD_10(10,CurrencyPair.AUD_USD), AUD_USD_12(12,CurrencyPair.AUD_USD), AUD_USD_15(15,CurrencyPair.AUD_USD), AUD_USD_20(20,CurrencyPair.AUD_USD), AUD_USD_30(30,CurrencyPair.AUD_USD),
