@@ -75,7 +75,7 @@ public class StockClient2 {
 							connect();
 							subscribe();
 							receive();
-						} catch (IOException e) {
+						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						} finally {
@@ -104,7 +104,7 @@ public class StockClient2 {
 		}
 	}
 
-	private void connect() {
+	private Boolean connect() {
 		try {
 			clientSocket = new Socket("practiceproblem.epcylon.com", 80);
 			outToServer = new DataOutputStream(clientSocket.getOutputStream());
@@ -113,10 +113,13 @@ public class StockClient2 {
 			outToServer.writeBytes(sentence + '\n');
 			String response = inFromServer.readLine();
 			logger.info("FROM SERVER: " + response);
+			return true;
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Epcylon server is not reachable!");
+			// e.printStackTrace();
+			return false;
 		}
 	}
 

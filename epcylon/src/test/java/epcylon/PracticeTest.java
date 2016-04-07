@@ -29,7 +29,7 @@ public class PracticeTest {
 			sentence = "subscribe USD-CAD";
 			outToServer.writeBytes(sentence + '\n');
 			System.out.println("Start liste...");
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < 0; i++) {
 				response = inFromServer.readLine();
 				// mapper.readValue(response, StockData.class);
 				System.out.println(i + " FROM SERVER: " + response);
